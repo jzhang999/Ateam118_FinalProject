@@ -37,9 +37,11 @@ public class TimeReport {
 	 * Constructs a TimeReport with the given parameters
 	 * 
 	 * @param id the array that stores all the farm IDs.
-	 * @param weight
-	 * @param percentage
-	 * @param totalWeight
+	 * @param weight the array that stores the total milk weight for each farm
+	 * @param percentage the array that stores the percentage of milk weight for 
+	 *                   each farm
+	 * @param totalWeight the int that stores the total weight of the milk of all 
+	 *                    farms
 	 */
 	public TimeReport(int[] id, int[] weight, double[] percentage, int totalWeight) {
 		this.id = id;
@@ -48,18 +50,38 @@ public class TimeReport {
 		this.totalWeight = totalWeight;
 	}
 	
+	/**
+	 * Accessor of the id array
+	 * 
+	 * @return the id array
+	 */
 	public int[] getId() {
 		return id;
 	}
 	
+	/**
+	 * Accessor of the weight array
+	 * 
+	 * @return the weight array
+	 */
 	public int[] getWeight() {
 		return weight;
 	}
 	
+	/**
+	 * Accessor of the percentage array
+	 * 
+	 * @return the percentage array
+	 */
 	public double[] getPercentage() {
 		return percentage;
 	}
 	
+	/**
+	 * Accessor of the total milk weight of all farms
+	 * 
+	 * @return the total milk weight of all farms
+	 */
 	public int getTotalWeight() {
 		return totalWeight;
 	}

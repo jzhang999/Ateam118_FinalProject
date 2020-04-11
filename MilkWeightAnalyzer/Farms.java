@@ -22,7 +22,7 @@ public class Farms {
 	}
 	
 	/**
-	 * Reads the information from a csv file. If the file has a line with error,
+	 * Reads the information from a csv file. If the file has a line with errors,
 	 * an IllegalArgumentException will be thrown.
 	 * 
 	 * @param fileName the name of the csv file
@@ -31,42 +31,68 @@ public class Farms {
 	 *                                  contains a line with error
 	 */
 	public void readCsvFile(String fileName) throws IOException {
+		check(fileName);
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String newLine = br.readLine();
 		newLine = br.readLine();
 		while (newLine != null) {
 			String[] line = newLine.split(",");
-			if (line.length == 3) {
-				String[] date = line[0].split("-");
-				String[] farm = line[1].split(" ");
-				String milkWeight = line[2];
-				try {
+			String[] date = line[0].split("-");
+			String[] farm = line[1].split(" ");
+			String milkWeight = line[2];
+			int year = Integer.parseInt(date[0]);
+			int month = Integer.parseInt(date[1]);
+			int day = Integer.parseInt(date[2]);
+			int id = Integer.parseInt(farm[1]);	
+			int weight = Integer.parseInt(milkWeight);
+			//Read Year class to learn details of how to access data					
+			//(NOT required)
+			if (farms.contains(id)) {					
+				if (farms.get(id).getYearData().contains(year)) {
+					farms.get(id).getData(year).data[month][day] = weight;
+					farms.get(id).getData(year).data[month][0] += weight;						
+				} else {
+					farms.get(id).insertNewYear(year);
+					farms.get(id).getData(year).data[month][day] = weight;
+					farms.get(id).getData(year).data[month][0] += weight;
+				}
+			} else {
+				farms.insert(id, new Farm(id));
+				farms.get(id).insertNewYear(year);						
+				farms.get(id).getData(year).data[month][day] = weight;
+				farms.get(id).getData(year).data[month][0] += weight;
+			}
+			newLine = br.readLine();
+		}
+	}
+	
+	/**
+	 * Helper method that test if the file contains errors
+	 * 
+	 * @param fileName the name of the file
+	 * @throws IllegalArgumentException if the file contains errors
+	 */
+	private void check(String fileName) {
+		try {
+			BufferedReader br = new BufferedReader(new FileReader(fileName));
+			String newLine = br.readLine();
+			newLine = br.readLine();
+			while (newLine != null) {
+				String[] line = newLine.split(",");
+				if (line.length == 3) {
+					String[] date = line[0].split("-");
+					String[] farm = line[1].split(" ");
+					String milkWeight = line[2];
 					int year = Integer.parseInt(date[0]);
 					int month = Integer.parseInt(date[1]);
 					int day = Integer.parseInt(date[2]);
-					int id = Integer.parseInt(farm[1]);
+					int id = Integer.parseInt(farm[1]);	
 					int weight = Integer.parseInt(milkWeight);
-					//Read Year class to learn details of how to access data.
-					if (farms.contains(id)) {
-						if (farms.get(id).getYearData().contains(year)) {
-							farms.get(id).getData(year).data[month][day] = weight;
-							farms.get(id).getData(year).data[month][0] += weight;
-						} else {
-							farms.get(id).insertNewYear(year);
-							farms.get(id).getData(year).data[month][day] = weight;
-							farms.get(id).getData(year).data[month][0] += weight;
-						}
-					} else {
-						farms.insert(id, new Farm(id));
-						farms.get(id).insertNewYear(year);
-						farms.get(id).getData(year).data[month][day] = weight;
-						farms.get(id).getData(year).data[month][0] += weight;
-					}
-				} catch (Exception e) {
-					throw new IllegalArgumentException("File contains error.");
 				}
+				newLine = br.readLine();
 			}
-			newLine = br.readLine();
+		} catch (Exception e) {
+			throw new IllegalArgumentException("File contains errors.");
 		}
 	}
 	
@@ -212,27 +238,46 @@ public class Farms {
 //	
 //	public static void main(String[] args) throws IOException {
 //		Farms f = new Farms();
+//		
 //		f.readCsvFile("2019-1.csv");
+//		f.readCsvFile("2019-2.csv");
+//		f.readCsvFile("2019-3.csv");
+//		f.readCsvFile("2019-4.csv");
+//		f.readCsvFile("2019-5.csv");
+//		f.readCsvFile("2019-6.csv");
+//		f.readCsvFile("2019-7.csv");
+//		f.readCsvFile("2019-8.csv");
+//		f.readCsvFile("2019-9.csv");
+//		f.readCsvFile("2019-10.csv");
+//		f.readCsvFile("2019-11.csv");
+//		f.readCsvFile("2019-12.csv");
 //		System.out.println();
-//		FarmReport frp = f.getFarmRep(0, 2019);
-//		System.out.println(frp.getTotalWeight());
-//		TimeReport trp = f.getDateRangeRep(2019, 1, 1, 1, 31);
+//		
+//		FarmReport frp = f.getFarmRep(18, 2019);
+//		System.out.println(frp.getWeight(1));
+//		
+//		TimeReport trp = f.getDateRangeRep(2019, 1, 1, 12, 30);
 //		for (int i = 0; i <= 2; i++) {
 //			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
 //					+ " " + trp.getPercentage()[i]);
 //			System.out.println();
 //		}
+//		System.out.println();
+//		
 //		TimeReport trp2 = f.getMonthlyReport(2019, 1);
 //		for (int i = 0; i <= 2; i++) {
-//			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
-//					+ " " + trp.getPercentage()[i]);
+//			System.out.print(trp2.getId()[i] + " " + trp2.getWeight()[i] 
+//					+ " " + trp2.getPercentage()[i]);
 //			System.out.println();
 //		}
+//		System.out.println();
+//		
 //		TimeReport trp3 = f.getAnnualReport(2019);
 //		for (int i = 0; i <= 2; i++) {
-//			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
-//					+ " " + trp.getPercentage()[i]);
+//			System.out.print(trp3.getId()[i] + " " + trp3.getWeight()[i] 
+//					+ " " + trp3.getPercentage()[i]);
 //			System.out.println();
 //		}
+//		System.out.println();
 //	}
 }

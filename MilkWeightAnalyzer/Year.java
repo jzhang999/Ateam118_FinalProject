@@ -24,7 +24,7 @@ public class Year {
 	/**
 	 * Constructs a Year object without any record.
 	 * 
-	 * @param year
+	 * @param year the number of year
 	 */
 	public Year(int year) {
 		this.year = year;

@@ -92,9 +92,17 @@ public class Farm {
 		}
 		
 		for (int i=startM; i<=endM; i++) {
-			if (i == startM) {
-				for (int j = startD; j <= year.data[startM].length - 1; j++) {
-					totalWeight += year.data[startM][j];
+			if (i == endM && i == startM) {
+				for (int j = startD; j <= endD; j++) {
+					totalWeight += year.data[i][j];
+				}
+			} else if (i == startM) {
+				for (int j = startD; j <= year.data[i].length - 1; j++) {
+					totalWeight += year.data[i][j];
+				}
+			} else if (i == endM) {
+				for (int j = 1; j <= endD; j++) {
+					totalWeight += year.data[i][j];
 				}
 			} else {
 				for (int j = 1; j <= year.data[i].length - 1; j++) {

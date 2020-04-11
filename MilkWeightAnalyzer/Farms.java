@@ -23,7 +23,8 @@ public class Farms {
 	
 	/**
 	 * Reads the information from a csv file. If the file has a line with errors,
-	 * an IllegalArgumentException will be thrown.
+	 * an IllegalArgumentException will be thrown, and that file with errors will
+	 * not affect the data that is read into the program before.
 	 * 
 	 * @param fileName the name of the csv file
 	 * @throws IOException if any exception happens while reading the file

@@ -1,8 +1,19 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A red black tree to store the data in the project. This red black tree has
+ * all the functions except deletion because we don't need to delete node in
+ * this project.
+ * 
+ * @author Xinrui Liu
+ *
+ * @param <K> the type of the key
+ * @param <V> the type of the value
+ */
 public class RBT<K extends Comparable<K>, V> {
 
+	//Constants that represents the color of the nodes.
     public static final int RED = 0;
     public static final int BLACK = 1;
     
@@ -59,6 +70,7 @@ public class RBT<K extends Comparable<K>, V> {
     
     /**
      * Recursive helper method for getInOrderTraversal().
+     * 
      * @param cur the current node in the recursion
      * @param result the result ArrayList<K>
      */
@@ -73,9 +85,9 @@ public class RBT<K extends Comparable<K>, V> {
     
     /** 
      * Add the key,value pair to the data structure and increase the number of keys.
-     * If key is null, throw IllegalNullKeyException;
-     * If key is already in data structure, throw DuplicateKeyException(); 
-     * Do not increase the num of keys in the structure, if key,value pair is not added.
+     * 
+     * @param key the key of the key value pair
+     * @param value the value of the key value pair
      */
     public void insert(K key, V value) {
     	if (size==0) {
@@ -91,11 +103,11 @@ public class RBT<K extends Comparable<K>, V> {
     
     /**
      * Recursive helper method for insert(K key, V value).
+     * 
      * @param cur current node in the recursion
      * @param key the key of the new node
      * @param value the value of the new node
      * @return the current node
-     * @throws DuplicateKeyException if duplicate key is found
      */
     private Node insertH(Node cur, K key, V value) {
     	if (cur == null) {
@@ -115,6 +127,7 @@ public class RBT<K extends Comparable<K>, V> {
     
     /**
      * Helper method that rebalance the RBT
+     * 
      * @param g the grandparent node
      * @return the new root of this sub-tree
      */
@@ -255,9 +268,9 @@ public class RBT<K extends Comparable<K>, V> {
     /**
      * Returns the value associated with the specified key.
      *
-     * Does not remove key or decrease number of keys
-     * If key is null, throw IllegalNullKeyException 
-     * If key is not found, throw KeyNotFoundException().
+     * @param key the key of the target
+     * @return the value of the given key
+     * @throws IllegalArgumentException if the key is not found.
      */
     public V get(K key) {
         V target = getH(root, key);
@@ -266,10 +279,11 @@ public class RBT<K extends Comparable<K>, V> {
     
     /**
      * Recursive helper method for get(K key).
+     * 
      * @param cur current node in the recursion
      * @param key the key of the node that we need to find
      * @return the value of the target node
-     * @throws KeyNotFoundException if the key is not in the BST
+     * @throws IllegalArgumentException if the key is not found.
      */
     private V getH(Node cur, K key) {
     	if (cur == null) {
@@ -288,8 +302,8 @@ public class RBT<K extends Comparable<K>, V> {
 
     /** 
      * Returns true if the key is in the data structure
-     * If key is null, throw IllegalNullKeyException 
-     * Returns false if key is not null and is not present 
+     * 
+     * @return true if the key is in the red black tree, false otherwise
      */
     public boolean contains(K key) { 
         return containsH(root, key);
@@ -297,6 +311,7 @@ public class RBT<K extends Comparable<K>, V> {
     
     /**
      * Recursive helper method for contains().
+     * 
      * @param cur the current node in the recursion
      * @param key the key of the target node
      * @return true if node is found, false otherwise
@@ -316,6 +331,11 @@ public class RBT<K extends Comparable<K>, V> {
     	}
     }
     
+    /**
+     * Accessor of the size of the tree.
+     * 
+     * @return the nubmer of keys in the tree.
+     */
     public int size() {
     	return size;
     }

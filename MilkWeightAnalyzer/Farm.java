@@ -1,18 +1,42 @@
-
+/**
+ * A Farm object represents a single farm. It stores the ID of a farm and a red 
+ * black tree that contains all the data. The red black tree stores several Year 
+ * objects.
+ * 
+ * @author Xinrui Liu
+ *
+ */
 public class Farm {
 	
-	private int id;
-	private RBT<Integer, Year> yearData;
+	private int id;//The id of this farm
+	private RBT<Integer, Year> yearData;//The data of this farm
 	
+	/**
+	 * Constructs a farm with the given ID and empty data.
+	 * 
+	 * @param id the id of this farm
+	 */
 	public Farm(int id) {
 		this.id = id;
 		this.yearData = new RBT<Integer, Year>();
 	}
 	
+	/**
+	 * Insert a year that is not present in the data of this farm.
+	 * 
+	 * @param year the number of the new year
+	 */
 	public void insertNewYear(int year) {
 		this.yearData.insert(year, new Year(year));
 	}
 	
+	/**
+	 * Get the data of the given year
+	 * 
+	 * @param year the number of the given year
+	 * @return a Year object that contains the data of this year
+	 * @throws IllegalArgumentException if the data does not contains the given year
+	 */
 	public Year getData(int year) {
 		if (!yearData.contains(year)) {
 			throw new IllegalArgumentException("Invalid year.");
@@ -20,14 +44,35 @@ public class Farm {
 		return yearData.get(year);
 	}
 	
+	/**
+	 * Accessor of the farm id.
+	 * 
+	 * @return the id of this farm
+	 */
 	public int getId() {
 		return id;
 	}
 	
+	/**
+	 * Accessor of the data of this farm.
+	 * 
+	 * @return the data of this farm
+	 */
 	public RBT<Integer, Year> getYearData(){
 		return this.yearData;
 	}
 	
+	/**
+	 * Get the total milk weight of this farm in the given period of time
+	 * 
+	 * @param startY the year of the period
+	 * @param startM the starting month 
+	 * @param startD the starting day
+	 * @param endM the end month
+	 * @param endD the end day
+	 * @return the milk weight of this farm in this period. 0 if this farm does not
+	 *         have any record of the given period.
+	 */
 	public int getWeightInRange(int startY, int startM, int startD,
 			int endM, int endD) {
 		

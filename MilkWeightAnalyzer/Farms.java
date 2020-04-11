@@ -3,14 +3,33 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * A Farms object represents the collection of all the farms. It stores the data 
+ * of all the farms by Farm objects and can generate TimeReport and FarmReport.
+ * 
+ * @author Xinrui Liu
+ *
+ */
 public class Farms {
 	
-	private RBT<Integer, Farm> farms;
+	private RBT<Integer, Farm> farms;//The red black tree that stores all the farms
 	
+	/**
+	 * Constructs an empty collection of farms.
+	 */
 	public Farms() {
 		this.farms = new RBT<Integer, Farm>();
 	}
 	
+	/**
+	 * Reads the information from a csv file. If the file has a line with error,
+	 * an IllegalArgumentException will be thrown.
+	 * 
+	 * @param fileName the name of the csv file
+	 * @throws IOException if any exception happens while reading the file
+	 * @throws IllegalArgumentException with description message if the file 
+	 *                                  contains a line with error
+	 */
 	public void readCsvFile(String fileName) throws IOException {
 		BufferedReader br = new BufferedReader(new FileReader(fileName));
 		String newLine = br.readLine();
@@ -27,6 +46,7 @@ public class Farms {
 					int day = Integer.parseInt(date[2]);
 					int id = Integer.parseInt(farm[1]);
 					int weight = Integer.parseInt(milkWeight);
+					//Read Year class to learn details of how to access data.
 					if (farms.contains(id)) {
 						if (farms.get(id).getYearData().contains(year)) {
 							farms.get(id).getData(year).data[month][day] = weight;
@@ -43,13 +63,24 @@ public class Farms {
 						farms.get(id).getData(year).data[month][0] += weight;
 					}
 				} catch (Exception e) {
-					
+					throw new IllegalArgumentException("File contains error.");
 				}
 			}
 			newLine = br.readLine();
 		}
 	}
 	
+	/**
+	 * Generates the report of the given farm in a given year.
+	 * 
+	 * For how to access data in the FarmReport object, read the FarmReport class.
+	 * 
+	 * @param id the id of the farm
+	 * @param year the year of the report
+	 * @return a FarmReport object with necessary information
+	 * @throws IllegalArgumentException with description message if the farm ID is 
+	 *                                  invalid or the year is invalid
+	 */
 	public FarmReport getFarmRep(int id, int year) {
 		if (!farms.contains(id)) {
 			throw new IllegalArgumentException("Invalid farm ID.");
@@ -68,6 +99,19 @@ public class Farms {
 		return new FarmReport(weight, percentage);
 	}
 	
+	/**
+	 * Generates a report of the given period of time.
+	 * 
+	 * For how to access data in the TimeReport object, read the TimeReport class.
+	 * 
+	 * @param startY the year of the period
+	 * @param startM the starting month
+	 * @param startD the starting day
+	 * @param endM the end month
+	 * @param endD the end day
+	 * @return a TimeReport object that contains necessary information
+	 * @throws IllegalArgumentException if the input date is invalid.
+	 */
 	public TimeReport getDateRangeRep(int startY, int startM, int startD,
 			int endM, int endD) {
 		int[] id = new int[farms.size()];
@@ -78,7 +122,10 @@ public class Farms {
 		int i = 0;
 		for (int farmId : idList) {
 			id[i] = farmId;
-			weight[i] = farms.get(farmId).getWeightInRange(startY, startM, startD, endM, endD);
+			//The issue that this farm has no record in this year is solved in the
+			//Farm class.
+			weight[i] = farms.get(farmId).getWeightInRange(startY, startM, 
+					startD, endM, endD);
 			totalWeight += weight[i];
 			i++;
 		}
@@ -88,14 +135,39 @@ public class Farms {
 		return new TimeReport(id, weight, percentage, totalWeight);
 	}
 	
+	/**
+	 * Generates a report of the given year.
+	 * 
+	 * For how to access data in the TimeReport object, read the TimeReport class.
+	 * 
+	 * @param year the year of the report
+	 * @return a TimeReport object that contains necessary information
+	 */
 	public TimeReport getAnnualReport(int year) {
 		return this.getDateRangeRep(year, 1, 1, 12, 31);
 	}
 	
+	/**
+	 * Generates a report of the given month.
+	 * 
+	 * For how to access data in the TimeReport object, read the TimeReport class.
+	 * 
+	 * @param year the year of the report
+	 * @param month the month of the report
+	 * @return a TimeReport object that contains necessary information
+	 */
 	public TimeReport getMonthlyReport(int year, int month) {
-		return this.getDateRangeRep(year, month, 1, month, this.daysInMonth(year, month));
+		return this.getDateRangeRep(year, month, 1, month, 
+				this.daysInMonth(year, month));
 	}
 	
+	/**
+	 * Helper method to decide the number of days in a month
+	 * 
+	 * @param year the year 
+	 * @param month the month
+	 * @return the number of days in a month 
+	 */
 	private int daysInMonth(int year, int month) {
 		switch (month) {
 			case 2:
@@ -117,6 +189,12 @@ public class Farms {
 		}
 	}
 	
+	/**
+	 * Helper method to decide whether a year is a leap year or not.
+	 * 
+	 * @param year the number of the year
+	 * @return true if this year is leap year, false otherwise
+	 */
 	private boolean isLeap(int year) {
 		if (year%4 == 0) {
 			if (year%100 == 0) {
@@ -130,26 +208,31 @@ public class Farms {
 		return false;
 	}
 	
-	public static void main(String[] args) throws IOException {
-		Farms f = new Farms();
-		f.readCsvFile("2019-1.csv");
-		System.out.println();
-		FarmReport frp = f.getFarmRep(0, 2019);
-		System.out.println(frp.getTotalWeight());
-		TimeReport trp = f.getDateRangeRep(2019, 1, 1, 1, 31);
-		for (int i = 0; i <= 2; i++) {
-			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] + " " + trp.getPercentage()[i]);
-			System.out.println();
-		}
-		TimeReport trp2 = f.getMonthlyReport(2019, 1);
-		for (int i = 0; i <= 2; i++) {
-			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] + " " + trp.getPercentage()[i]);
-			System.out.println();
-		}
-		TimeReport trp3 = f.getAnnualReport(2019);
-		for (int i = 0; i <= 2; i++) {
-			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] + " " + trp.getPercentage()[i]);
-			System.out.println();
-		}
-	}
+//	A main method to test the functionality of the backend.
+//	
+//	public static void main(String[] args) throws IOException {
+//		Farms f = new Farms();
+//		f.readCsvFile("2019-1.csv");
+//		System.out.println();
+//		FarmReport frp = f.getFarmRep(0, 2019);
+//		System.out.println(frp.getTotalWeight());
+//		TimeReport trp = f.getDateRangeRep(2019, 1, 1, 1, 31);
+//		for (int i = 0; i <= 2; i++) {
+//			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
+//					+ " " + trp.getPercentage()[i]);
+//			System.out.println();
+//		}
+//		TimeReport trp2 = f.getMonthlyReport(2019, 1);
+//		for (int i = 0; i <= 2; i++) {
+//			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
+//					+ " " + trp.getPercentage()[i]);
+//			System.out.println();
+//		}
+//		TimeReport trp3 = f.getAnnualReport(2019);
+//		for (int i = 0; i <= 2; i++) {
+//			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
+//					+ " " + trp.getPercentage()[i]);
+//			System.out.println();
+//		}
+//	}
 }

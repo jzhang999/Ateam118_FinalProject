@@ -84,10 +84,19 @@ public class Farm {
 		} catch (IllegalArgumentException e) {
 			return 0;
 		}
+		
 		if (startM < 1 || startM > 12 || endM < 1 || endM > 12
 				|| startD < 1 || endD < 1
 				|| year.data[startM].length-1 < startD
 				|| year.data[endM].length-1 < endD) {
+			throw new IllegalArgumentException("Invalid date.");
+		}
+		
+		if (startM > endM) {
+			throw new IllegalArgumentException("Invalid date.");
+		}
+		
+		if (startM == endM && startD > endD) {
 			throw new IllegalArgumentException("Invalid date.");
 		}
 		

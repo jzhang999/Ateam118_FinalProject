@@ -61,7 +61,7 @@ public class MainPage {
         
         // set center, user choices to redirect
         VBox layout = new VBox();
-        layout = choices(layout);
+        layout = choices(layout, mainScene);
         layout.setAlignment(Pos.TOP_CENTER);
         root.setCenter(layout);
         
@@ -78,7 +78,7 @@ public class MainPage {
      * create a pane for the user choices
      * @return
      */
-    private VBox choices(VBox layout) {       
+    private VBox choices(VBox layout, Scene mainScene) {       
        layout.setSpacing(20); 
 
        Label label = new Label("Your Choices: ");
@@ -86,10 +86,11 @@ public class MainPage {
        layout.getChildren().add(label);
 
        Button btn1 = new Button("Farm Report");
+       btn1.setOnAction(e -> FarmReport(mainScene));
        btn1.setPrefSize(200, 80);
        btn1.setStyle("-fx-font-size:20");
        layout.getChildren().add(btn1);
-
+       
        Button btn2 = new Button("Annual Report");
        btn2.setPrefSize(200, 80);
        btn2.setStyle("-fx-font-size:20");
@@ -115,6 +116,81 @@ public class MainPage {
         return imageView;
     }
     
+    private class FarmReport(Scene mainScene){
+		Scene FARMREPORT;
+		mainMenu.setScene(FARMREPORT);
+		
+		BorderPane b1 = new BorderPane();
+		FARMREPORT = new Scene(b1, WINDOW_WIDTH, WINDOW_HEIGHT);
+		
+		// add hbox1
+		HBox h1 = new HBox();
+		Button back = new Button("Back");
+		back.setOnAction(e -> mainMenu.setScene(mainScene));
+		h1.getChildren().add(back);
+		Label Fmrpt = new Label("Farm Report");
+		h1.getChildren().add(Fmrpt);
+		
+		//add prompt in hbox1
+		TextField idT = new TextField();
+		idT.setPromptText("Farm ID ");
+		idT.setMaxWidth(60);
+		String idS = idT.getText();
+		
+		//add user input info in hbox1
+		TextField yearT = new TextField();
+		yearT.setPromptText("Year ");
+		yearT.setMaxWidth(60);
+		String yearS = yearT.getText();
+		h1.getChildren().add(idT);
+		h1.getChildren().add(yearT);
+		
+		VBox v1 = new VBox();
+		v1.getChildren().add(h1);
+		v1.getChildren().add(new Label("The Milk Weights for " + idS + " in " + yearS + " are listed below: "));
+		b1.setTop(v1);
+		
+		//create hard-coded grid pane to show data
+		GridPane g2 = new GridPane();
+		g2.add(new Label("Month"), 0, 0);
+		g2.add(new Label("Jan"), 0, 1);
+		g2.add(new Label("Feb"), 0, 2);
+		g2.add(new Label("Mar"), 0, 3);
+		g2.add(new Label("Apr"), 0, 4);
+		g2.add(new Label("May"), 0, 5);
+		g2.add(new Label("Jun"), 0, 6);
+		g2.add(new Label("Jul"), 0, 7);
+		g2.add(new Label("Aug"), 0, 8);
+		g2.add(new Label("Sep"), 0, 9);
+		g2.add(new Label("Oct"), 0, 10);
+		g2.add(new Label("Nov"), 0, 11);
+		g2.add(new Label("Dec"), 0, 12);
+		g2.add(new Label("Weights"), 1, 0);
+		g2.add(new Label("10000000"), 1, 1);
+		g2.add(new Label("10000000"), 1, 2);
+		g2.add(new Label("10000000"), 1, 3);
+		g2.add(new Label("10000000"), 1, 4);
+		g2.add(new Label("10000000"), 1, 5);
+		g2.add(new Label("10000000"), 1, 6);
+		g2.add(new Label("10000000"), 1, 7);
+		g2.add(new Label("10000000"), 1, 8);
+		g2.add(new Label("10000000"), 1, 9);
+		g2.add(new Label("10000000"), 1, 10);
+		g2.add(new Label("10000000"), 1, 11);
+		g2.add(new Label("10000000"), 1, 12);
+		b1.setCenter(g2);
+		
+		// add sort options
+		HBox h3 = new HBox();
+		h3.getChildren().add(new Label("SORT BY:"));
+		Button mthS = new Button("Month Order");
+		Button ascS = new Button("Asscending Order");
+		Button desS = new Button("Descending Order");
+		h3.getChildren().add(mthS);
+		h3.getChildren().add(ascS);
+		h3.getChildren().add(desS);
+		b1.setBottom(h3);
+	}
 }
 
 

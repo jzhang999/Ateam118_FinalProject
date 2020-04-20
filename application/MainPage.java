@@ -67,6 +67,7 @@ public class MainPage {
         
         // Bottom exit button
         Button exit = new Button("Done");
+        exit.setOnAction(e -> mainMenu.close());
         root.setBottom(exit);
         BorderPane.setAlignment(exit, Pos.BOTTOM_RIGHT);
         

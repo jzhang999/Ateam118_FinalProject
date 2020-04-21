@@ -239,204 +239,204 @@ public class Farms {
 	
 //	A main method to test the functionality of the backend.
 
-	public static void main(String[] args) throws IOException {
-		Farms f = new Farms();
-		
-		//Read input files
-		f.readCsvFile("2019-1.csv");
-		f.readCsvFile("2019-2.csv");
-		f.readCsvFile("2019-3.csv");
-		f.readCsvFile("2019-4.csv");
-		f.readCsvFile("2019-5.csv");
-		f.readCsvFile("2019-6.csv");
-		f.readCsvFile("2019-7.csv");
-		f.readCsvFile("2019-8.csv");
-		f.readCsvFile("2019-9.csv");
-		f.readCsvFile("2019-10.csv");
-		f.readCsvFile("2019-11.csv");
-		f.readCsvFile("2019-12.csv");
-		
-		//Test invalid farm id
-		System.out.println("Test invalid farm id.");
-		try {
-			FarmReport frp = f.getFarmRep(999, 2019);
-			System.out.println("No exception thrown. FAIL");
-		} catch (IllegalArgumentException e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		//Test invalid year for farm report
-		System.out.println("Test invalid year for farm report.");
-		try {
-			FarmReport frp = f.getFarmRep(20, 2020);
-			System.out.println("No exception thrown. FAIL");
-		} catch (IllegalArgumentException e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		//Test valid farm report
-		System.out.println("Test valid farm report.");
-		FarmReport frp = f.getFarmRep(18, 2019);
-		System.out.print(frp.getWeight(2) + " ");
-		System.out.print(frp.getPercentage(2));
-		System.out.println();
-		System.out.println();
-		
-		//Test invalid date for date range report.
-		System.out.println("Test invalid date for date range report.");
-		//Case1: invalid year for date range report
-		//In this case, regardless of the month and the date the user
-		//types, the program will return an empty TimeReport,
-		//indicating that no record is found in this year.
-		//The GUI can explain this while displaying report like the following:
-		//"If you find a bunch of 0's and NaN's, then the data base does not
-		//contain data for this year."
-		System.out.println("Case1: invalid year for date range report");
-		try {
-			TimeReport trp = f.getDateRangeRep(2020, 2, 1, 8, 27);
-			for (int i = 0; i <= 2; i++) {
-				System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
-						+ " " + trp.getPercentage()[i]);
-				System.out.println();
-			}
-			System.out.println("No exception thrown. PASS");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		//Test invalid date for date range report.
-		//Case2: valid year but month out of range
-		//In this case, an IllegalArgumentExceptiion with description
-		//will be thrown.
-		System.out.println("Case2: valid year but month out of range");
-		try {
-			TimeReport trp = f.getDateRangeRep(2019, 0, 1, 8, 27);
-			System.out.println("No exception thrown. FAIL");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		try {
-			TimeReport trp = f.getDateRangeRep(2019, 1, 1, 15, 27);
-			System.out.println("No exception thrown. FAIL");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		//Test invalid date for date range report.
-		//Case3: valid year and month but day out of range
-		//In this case, an IllegalArgumentExceptiion with description
-		//will be thrown.
-		System.out.println("Case3: valid year and month but day out of range");
-		try {
-			TimeReport trp = f.getDateRangeRep(2019, 2, 29, 8, 27);
-			System.out.println("No exception thrown. FAIL");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		try {
-			TimeReport trp = f.getDateRangeRep(2019, 1, 1, 12, 333);
-			System.out.println("No exception thrown. FAIL");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		//Test invalid date for date range report.
-		//Case4: valid date but start later than end
-		//In this case, an IllegalArgumentExceptiion with description
-		//will be thrown.
-		System.out.println("Case4: valid date but start later than end");
-		try {
-			TimeReport trp = f.getDateRangeRep(2019, 12, 5, 2, 27);
-			System.out.println("No exception thrown. FAIL");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		
-		//Test valid date range report
-		System.out.println("Test valid date range report");
-		TimeReport trp = f.getDateRangeRep(2019, 2, 28, 9, 27);
-		for (int i = 0; i <= 2; i++) {
-			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
-					+ " " + trp.getPercentage()[i]);
-			System.out.println();
-		}
-		System.out.println();
-		
-		//Test invalid date for monthly report.
-		System.out.println("Test invalid date for monthly report.");
-		//Case1: invalid year for monthly report
-		//In this case, regardless of the month the user
-		//types, the program will return an empty TimeReport,
-		//indicating that no record is found in this year.
-		System.out.println("Case1: invalid year for monthly report");
-		try {
-			TimeReport trp2 = f.getMonthlyRep(2020, 2);
-			for (int i = 0; i <= 2; i++) {
-				System.out.print(trp2.getId()[i] + " " + trp2.getWeight()[i] 
-						+ " " + trp2.getPercentage()[i]);
-				System.out.println();
-			}
-			System.out.println("No exception thrown. PASS");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-
-		//Test invalid date for monthly report.
-		//Case2: valid year but invalid month
-		System.out.println("Case2: valid year but invalid month");
-		try {
-			TimeReport trp2 = f.getMonthlyRep(2019, 23);
-			System.out.println("No exception thrown. FAIL");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-
-		//Test valid monthly report
-		System.out.println("Test valid monthly report");
-		TimeReport trp2 = f.getMonthlyRep(2019, 11);
-		for (int i = 0; i <= 2; i++) {
-			System.out.print(trp2.getId()[i] + " " + trp2.getWeight()[i] 
-					+ " " + trp2.getPercentage()[i]);
-			System.out.println();
-		}
-		System.out.println();
-		
-		//Test invalid year for annual report.
-		System.out.println("Test invalid year for annual report.");
-		//In this case, regardless of the month the user
-		//types, the program will return an empty TimeReport,
-		//indicating that no record is found in this year.
-		try {
-			TimeReport trp3 = f.getAnnualRep(2020);
-			for (int i = 0; i <= 2; i++) {
-				System.out.print(trp3.getId()[i] + " " + trp3.getWeight()[i] 
-						+ " " + trp3.getPercentage()[i]);
-				System.out.println();
-			}
-			System.out.println("No exception thrown. PASS");
-		} catch (Exception e) {
-			System.out.println(e.getMessage());
-		}
-		System.out.println();
-		
-		//Test valid annual report
-		System.out.println("Test valid annual report");
-		TimeReport trp3 = f.getAnnualRep(2019);
-		for (int i = 0; i <= 2; i++) {
-			System.out.print(trp3.getId()[i] + " " + trp3.getWeight()[i] 
-					+ " " + trp3.getPercentage()[i]);
-			System.out.println();
-		}
-		System.out.println();
-	}
+//	public static void main(String[] args) throws IOException {
+//		Farms f = new Farms();
+//		
+//		//Read input files
+//		f.readCsvFile("2019-1.csv");
+//		f.readCsvFile("2019-2.csv");
+//		f.readCsvFile("2019-3.csv");
+//		f.readCsvFile("2019-4.csv");
+//		f.readCsvFile("2019-5.csv");
+//		f.readCsvFile("2019-6.csv");
+//		f.readCsvFile("2019-7.csv");
+//		f.readCsvFile("2019-8.csv");
+//		f.readCsvFile("2019-9.csv");
+//		f.readCsvFile("2019-10.csv");
+//		f.readCsvFile("2019-11.csv");
+//		f.readCsvFile("2019-12.csv");
+//		
+//		//Test invalid farm id
+//		System.out.println("Test invalid farm id.");
+//		try {
+//			FarmReport frp = f.getFarmRep(999, 2019);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (IllegalArgumentException e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		//Test invalid year for farm report
+//		System.out.println("Test invalid year for farm report.");
+//		try {
+//			FarmReport frp = f.getFarmRep(20, 2020);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (IllegalArgumentException e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		//Test valid farm report
+//		System.out.println("Test valid farm report.");
+//		FarmReport frp = f.getFarmRep(18, 2019);
+//		System.out.print(frp.getWeight(2) + " ");
+//		System.out.print(frp.getPercentage(2));
+//		System.out.println();
+//		System.out.println();
+//		
+//		//Test invalid date for date range report.
+//		System.out.println("Test invalid date for date range report.");
+//		//Case1: invalid year for date range report
+//		//In this case, regardless of the month and the date the user
+//		//types, the program will return an empty TimeReport,
+//		//indicating that no record is found in this year.
+//		//The GUI can explain this while displaying report like the following:
+//		//"If you find a bunch of 0's and NaN's, then the data base does not
+//		//contain data for this year."
+//		System.out.println("Case1: invalid year for date range report");
+//		try {
+//			TimeReport trp = f.getDateRangeRep(2020, 2, 1, 8, 27);
+//			for (int i = 0; i <= 2; i++) {
+//				System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
+//						+ " " + trp.getPercentage()[i]);
+//				System.out.println();
+//			}
+//			System.out.println("No exception thrown. PASS");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		//Test invalid date for date range report.
+//		//Case2: valid year but month out of range
+//		//In this case, an IllegalArgumentExceptiion with description
+//		//will be thrown.
+//		System.out.println("Case2: valid year but month out of range");
+//		try {
+//			TimeReport trp = f.getDateRangeRep(2019, 0, 1, 8, 27);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		try {
+//			TimeReport trp = f.getDateRangeRep(2019, 1, 1, 15, 27);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		//Test invalid date for date range report.
+//		//Case3: valid year and month but day out of range
+//		//In this case, an IllegalArgumentExceptiion with description
+//		//will be thrown.
+//		System.out.println("Case3: valid year and month but day out of range");
+//		try {
+//			TimeReport trp = f.getDateRangeRep(2019, 2, 29, 8, 27);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		try {
+//			TimeReport trp = f.getDateRangeRep(2019, 1, 1, 12, 333);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		//Test invalid date for date range report.
+//		//Case4: valid date but start later than end
+//		//In this case, an IllegalArgumentExceptiion with description
+//		//will be thrown.
+//		System.out.println("Case4: valid date but start later than end");
+//		try {
+//			TimeReport trp = f.getDateRangeRep(2019, 12, 5, 2, 27);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		
+//		//Test valid date range report
+//		System.out.println("Test valid date range report");
+//		TimeReport trp = f.getDateRangeRep(2019, 2, 28, 9, 27);
+//		for (int i = 0; i <= 2; i++) {
+//			System.out.print(trp.getId()[i] + " " + trp.getWeight()[i] 
+//					+ " " + trp.getPercentage()[i]);
+//			System.out.println();
+//		}
+//		System.out.println();
+//		
+//		//Test invalid date for monthly report.
+//		System.out.println("Test invalid date for monthly report.");
+//		//Case1: invalid year for monthly report
+//		//In this case, regardless of the month the user
+//		//types, the program will return an empty TimeReport,
+//		//indicating that no record is found in this year.
+//		System.out.println("Case1: invalid year for monthly report");
+//		try {
+//			TimeReport trp2 = f.getMonthlyRep(2020, 2);
+//			for (int i = 0; i <= 2; i++) {
+//				System.out.print(trp2.getId()[i] + " " + trp2.getWeight()[i] 
+//						+ " " + trp2.getPercentage()[i]);
+//				System.out.println();
+//			}
+//			System.out.println("No exception thrown. PASS");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//
+//		//Test invalid date for monthly report.
+//		//Case2: valid year but invalid month
+//		System.out.println("Case2: valid year but invalid month");
+//		try {
+//			TimeReport trp2 = f.getMonthlyRep(2019, 23);
+//			System.out.println("No exception thrown. FAIL");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//
+//		//Test valid monthly report
+//		System.out.println("Test valid monthly report");
+//		TimeReport trp2 = f.getMonthlyRep(2019, 11);
+//		for (int i = 0; i <= 2; i++) {
+//			System.out.print(trp2.getId()[i] + " " + trp2.getWeight()[i] 
+//					+ " " + trp2.getPercentage()[i]);
+//			System.out.println();
+//		}
+//		System.out.println();
+//		
+//		//Test invalid year for annual report.
+//		System.out.println("Test invalid year for annual report.");
+//		//In this case, regardless of the month the user
+//		//types, the program will return an empty TimeReport,
+//		//indicating that no record is found in this year.
+//		try {
+//			TimeReport trp3 = f.getAnnualRep(2020);
+//			for (int i = 0; i <= 2; i++) {
+//				System.out.print(trp3.getId()[i] + " " + trp3.getWeight()[i] 
+//						+ " " + trp3.getPercentage()[i]);
+//				System.out.println();
+//			}
+//			System.out.println("No exception thrown. PASS");
+//		} catch (Exception e) {
+//			System.out.println(e.getMessage());
+//		}
+//		System.out.println();
+//		
+//		//Test valid annual report
+//		System.out.println("Test valid annual report");
+//		TimeReport trp3 = f.getAnnualRep(2019);
+//		for (int i = 0; i <= 2; i++) {
+//			System.out.print(trp3.getId()[i] + " " + trp3.getWeight()[i] 
+//					+ " " + trp3.getPercentage()[i]);
+//			System.out.println();
+//		}
+//		System.out.println();
+//	}
 	
 }

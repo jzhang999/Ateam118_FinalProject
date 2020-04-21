@@ -10,7 +10,7 @@ package application;
  */
 public class Farm {
 	
-	private int id;//The id of this farm
+	private String id;//The id of this farm
 	private RBT<Integer, Year> yearData;//The data of this farm
 	
 	/**
@@ -18,7 +18,7 @@ public class Farm {
 	 * 
 	 * @param id the id of this farm
 	 */
-	public Farm(int id) {
+	public Farm(String id) {
 		this.id = id;
 		this.yearData = new RBT<Integer, Year>();
 	}
@@ -51,7 +51,7 @@ public class Farm {
 	 * 
 	 * @return the id of this farm
 	 */
-	public int getId() {
+	public String getId() {
 		return id;
 	}
 	

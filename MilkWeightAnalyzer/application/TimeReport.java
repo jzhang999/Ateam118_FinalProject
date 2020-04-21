@@ -10,7 +10,7 @@ package application;
  */
 public class TimeReport {
 	
-	private int[] id;//The farm id that is stored in ascending order
+	private String[] id;//The farm id that is stored in ascending order
 	private int[] weight;//The total milk weight of the farms
 	private double[] percentage;//The percentage of the milk weight of each farm
 	private int totalWeight;//The total weight of the milk
@@ -45,7 +45,7 @@ public class TimeReport {
 	 * @param totalWeight the int that stores the total weight of the milk of all 
 	 *                    farms
 	 */
-	public TimeReport(int[] id, int[] weight, double[] percentage, int totalWeight) {
+	public TimeReport(String[] id, int[] weight, double[] percentage, int totalWeight) {
 		this.id = id;
 		this.weight = weight;
 		this.percentage = percentage;
@@ -57,7 +57,7 @@ public class TimeReport {
 	 * 
 	 * @return the id array
 	 */
-	public int[] getId() {
+	public String[] getId() {
 		return id;
 	}
 	

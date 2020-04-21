@@ -14,13 +14,13 @@ import java.util.List;
  */
 public class Farms {
 	
-	private RBT<Integer, Farm> farms;//The red black tree that stores all the farms
+	private RBT<String, Farm> farms;//The red black tree that stores all the farms
 	
 	/**
 	 * Constructs an empty collection of farms.
 	 */
 	public Farms() {
-		this.farms = new RBT<Integer, Farm>();
+		this.farms = new RBT<String, Farm>();
 	}
 	
 	/**
@@ -41,12 +41,11 @@ public class Farms {
 		while (newLine != null) {
 			String[] line = newLine.split(",");
 			String[] date = line[0].split("-");
-			String[] farm = line[1].split(" ");
+			String id = line[1];
 			String milkWeight = line[2];
 			int year = Integer.parseInt(date[0]);
 			int month = Integer.parseInt(date[1]);
 			int day = Integer.parseInt(date[2]);
-			int id = Integer.parseInt(farm[1]);	
 			int weight = Integer.parseInt(milkWeight);
 			//Read Year class to learn details of how to access data					
 			//(NOT required)
@@ -84,12 +83,11 @@ public class Farms {
 				String[] line = newLine.split(",");
 				if (line.length == 3) {
 					String[] date = line[0].split("-");
-					String[] farm = line[1].split(" ");
+					String id = line[1];
 					String milkWeight = line[2];
 					int year = Integer.parseInt(date[0]);
 					int month = Integer.parseInt(date[1]);
 					int day = Integer.parseInt(date[2]);
-					int id = Integer.parseInt(farm[1]);	
 					int weight = Integer.parseInt(milkWeight);
 				}
 				newLine = br.readLine();
@@ -110,7 +108,7 @@ public class Farms {
 	 * @throws IllegalArgumentException with description message if the farm ID is 
 	 *                                  invalid or the year is invalid
 	 */
-	public FarmReport getFarmRep(int id, int year) {
+	public FarmReport getFarmRep(String id, int year) {
 		if (!farms.contains(id)) {
 			throw new IllegalArgumentException("Invalid farm ID.");
 		}
@@ -143,13 +141,13 @@ public class Farms {
 	 */
 	public TimeReport getDateRangeRep(int startY, int startM, int startD,
 			int endM, int endD) {
-		int[] id = new int[farms.size()];
+		String[] id = new String[farms.size()];
 		int[] weight = new int[farms.size()];
 		double[] percentage = new double[farms.size()];
 		int totalWeight = 0;
-		List<Integer> idList = farms.getInOrderTraversal();
+		List<String> idList = farms.getInOrderTraversal();
 		int i = 0;
-		for (int farmId : idList) {
+		for (String farmId : idList) {
 			id[i] = farmId;
 			//The issue that this farm has no record in this year is solved in the
 			//Farm class.

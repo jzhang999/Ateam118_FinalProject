@@ -27,8 +27,8 @@ import javafx.stage.Stage;
  */
 public class Main extends Application {
     // static dataBase;
-	private static final int WINDOW_WIDTH = 400; // width of main page
-    private static final int WINDOW_HEIGHT = 850; // height of main page
+	private static final int WINDOW_WIDTH = 720; // width of main page
+    private static final int WINDOW_HEIGHT = 570; // height of main page
     private static final String APP_TITLE = "Welcome to Milk Weight Analyzer!"; // title of app
     private static final DecimalFormat DF = new DecimalFormat("0.00000");// formatter for the percentage
     private static Farms fms;// The back-end that stores all the information
@@ -50,6 +50,7 @@ public class Main extends Application {
         imageView1.setFitWidth(400);
         imageView1.setPreserveRatio(true);
         root.setTop(imageView1);
+        BorderPane.setAlignment(imageView1, Pos.TOP_CENTER);
         
         // set right image view
         ImageView imageView2 = setImage("cheese1.png");
@@ -66,13 +67,20 @@ public class Main extends Application {
         BorderPane.setAlignment(imageView3, Pos.BOTTOM_CENTER);
         
         // set center, user choices to redirect
-        VBox layout = new VBox();
+        HBox layout = new HBox();
+        VBox layoutLeft = new VBox();
+        VBox layoutRight = new VBox();
+        VBox layoutCenter = new VBox();
+        Label space = new Label("                 ");
+        layoutCenter.getChildren().add(space);
         VBox readFile = generateReadFileModule();
         VBox farmRep = generateFarmRepModule();
         VBox annualRep = generateAnnualRepModule();
         VBox monthlyRep = generateMonthlyRepModule();
         VBox dateRangeRep = generateDateRangeRepModule();
-        layout.getChildren().addAll(readFile, farmRep, annualRep, monthlyRep, dateRangeRep);
+        layoutLeft.getChildren().addAll(readFile, farmRep, monthlyRep);
+        layoutRight.getChildren().addAll(annualRep, dateRangeRep);
+        layout.getChildren().addAll(layoutLeft, layoutCenter, layoutRight);
         root.setCenter(layout);
         
         // Bottom exit button
@@ -134,10 +142,12 @@ public class Main extends Application {
     		Alert alt = new Alert(AlertType.INFORMATION, "Upload Succeeded!");
     		alt.showAndWait().filter(r -> r==ButtonType.OK);
     	} catch (Exception e) {
-    		Alert alt = new Alert(AlertType.WARNING, e.getMessage());
+    		Alert alt = new Alert(AlertType.WARNING, e.getMessage() 
+    				+ " File must in the MilkWeightAnalyzer directory.");
     		alt.showAndWait().filter(r -> r==ButtonType.OK);
     	}
     }
+    
     
     /**
      * Generate the farm report module
@@ -184,14 +194,14 @@ public class Main extends Application {
      */
     private static void getFarmRep(String id, String year) {
     	// Declare needed local fields
-    	int ID = 0;
+    	String ID = "";
     	int Year = 0;
     	FarmReport frp = null;
     	Stage farmRep = new Stage();
     	
     	// Read the user input
     	try {
-    		ID = Integer.parseInt(id);
+    		ID = id;
     		Year = Integer.parseInt(year);
     	} catch (Exception e) {
     		Alert alt = new Alert(AlertType.WARNING, "The format of ID or year is wrong.");
@@ -241,7 +251,7 @@ public class Main extends Application {
     	
     	// Set the scene and show the report
     	BorderPane rep = new BorderPane();
-    	Label farmid = new Label("Farm " + id + "  Year " + year);
+    	Label farmid = new Label(id + "  Year " + year);
     	rep.setTop(farmid);
     	rep.setLeft(month);
     	rep.setCenter(weight);
@@ -504,7 +514,7 @@ public class Main extends Application {
     	// Case 1: less than or equal to 50 farms
     	if (trp.getId().length<=50) {
     		// Set width for the window
-    		Width = 260;
+    		Width = 300;
     		
     		HBox hb = new HBox();
     		
@@ -518,7 +528,7 @@ public class Main extends Application {
         	
         	// Add data to each column
     		for (int i=0; i<trp.getId().length; i++) {
-    			Label Id = new Label(Integer.toString(trp.getId()[i])+"          ");
+    			Label Id = new Label(trp.getId()[i]+"          ");
         		id.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
         		weight.getChildren().add(Weight);
@@ -533,7 +543,7 @@ public class Main extends Application {
     	// Case 2: 51 to 100 farms
     	else if (trp.getId().length<=100) {
     		// Set width for the window
-    		Width = 400;
+    		Width = 500;
     		
     		// Set up the first column
     		HBox hb = new HBox();
@@ -545,7 +555,7 @@ public class Main extends Application {
         	percentage.getChildren().add(PERCENTAGE);
         	
     		for (int i=0; i<50; i++) {
-    			Label Id = new Label(Integer.toString(trp.getId()[i])+"          ");
+    			Label Id = new Label(trp.getId()[i]+"          ");
         		id.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
         		weight.getChildren().add(Weight);
@@ -567,7 +577,7 @@ public class Main extends Application {
         	percentage2.getChildren().add(PERCENTAGE2);
         	
     		for (int i=50; i<trp.getId().length; i++) {
-    			Label Id = new Label(Integer.toString(trp.getId()[i])+"          ");
+    			Label Id = new Label(trp.getId()[i]+"          ");
         		id2.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
         		weight2.getChildren().add(Weight);
@@ -582,7 +592,7 @@ public class Main extends Application {
     	// Case 3: more than 100 farms
     	else {
     		// Set width for the window
-    		Width = 600;
+    		Width = 750;
     		
     		
     		// Set up the first column
@@ -596,7 +606,7 @@ public class Main extends Application {
         	percentage.getChildren().add(PERCENTAGE);
         	
     		for (int i=0; i<50; i++) {
-    			Label Id = new Label(Integer.toString(trp.getId()[i])+"          ");
+    			Label Id = new Label(trp.getId()[i]+"          ");
         		id.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
         		weight.getChildren().add(Weight);
@@ -619,7 +629,7 @@ public class Main extends Application {
         	percentage2.getChildren().add(PERCENTAGE2);
         	
     		for (int i=50; i<100; i++) {
-    			Label Id = new Label(Integer.toString(trp.getId()[i])+"          ");
+    			Label Id = new Label(trp.getId()[i]+"          ");
         		id2.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
         		weight2.getChildren().add(Weight);
@@ -642,7 +652,7 @@ public class Main extends Application {
         	percentage3.getChildren().add(PERCENTAGE3);
         	
     		for (int i=100; i<trp.getId().length; i++) {
-    			Label Id = new Label(Integer.toString(trp.getId()[i])+"          ");
+    			Label Id = new Label(trp.getId()[i]+"          ");
         		id3.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
         		weight3.getChildren().add(Weight);

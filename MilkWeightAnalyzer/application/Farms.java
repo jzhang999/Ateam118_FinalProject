@@ -89,6 +89,10 @@ public class Farms {
 					int month = Integer.parseInt(date[1]);
 					int day = Integer.parseInt(date[2]);
 					int weight = Integer.parseInt(milkWeight);
+					if (month < 1 || month > 12 || day < 1 ||
+							day > daysInMonth(year, month)) {
+						throw new Exception();
+					}
 				}
 				newLine = br.readLine();
 			}

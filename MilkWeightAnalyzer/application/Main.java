@@ -1,7 +1,5 @@
 package application;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.text.DecimalFormat;
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -18,6 +16,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import java.io.*;
 
 /**
  * GUI for the Milk Weight Analyzer
@@ -26,12 +25,14 @@ import javafx.stage.Stage;
  *
  */
 public class Main extends Application {
-    // static dataBase;
-	private static final int WINDOW_WIDTH = 720; // width of main page
-    private static final int WINDOW_HEIGHT = 570; // height of main page
+
+	private static final int WINDOW_WIDTH = 740; // width of main page
+    private static final int WINDOW_HEIGHT = 700; // height of main page
     private static final String APP_TITLE = "Welcome to Milk Weight Analyzer!"; // title of app
     private static final DecimalFormat DF = new DecimalFormat("0.00000");// formatter for the percentage
     private static Farms fms;// The back-end that stores all the information
+    private static File data;// File to save the data 
+    private static PrintWriter datapw;// PrintWriter to write data to the file that stores the data
     
     /**
      * Start method.
@@ -41,7 +42,11 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
     	
+    	// Initialize fields
     	fms = new Farms();
+    	data = new File("data.csv");
+    	datapw = new PrintWriter(data);
+    	datapw.println("date,farm_id,weight");
 
     	BorderPane root = new BorderPane(); // Main layout of Border Pane
         
@@ -74,18 +79,23 @@ public class Main extends Application {
         Label space = new Label("                 ");
         layoutCenter.getChildren().add(space);
         VBox readFile = generateReadFileModule();
+        VBox saveData = generateSaveDataModule();
+        VBox changeData = generateChangeDataModule();
         VBox farmRep = generateFarmRepModule();
         VBox annualRep = generateAnnualRepModule();
         VBox monthlyRep = generateMonthlyRepModule();
         VBox dateRangeRep = generateDateRangeRepModule();
-        layoutLeft.getChildren().addAll(readFile, farmRep, monthlyRep);
-        layoutRight.getChildren().addAll(annualRep, dateRangeRep);
+        layoutLeft.getChildren().addAll(readFile, saveData, farmRep, monthlyRep);
+        layoutRight.getChildren().addAll(changeData, annualRep, dateRangeRep);
         layout.getChildren().addAll(layoutLeft, layoutCenter, layoutRight);
         root.setCenter(layout);
         
         // Bottom exit button
         Button exit = new Button("Exit");
-        exit.setOnAction(e -> primaryStage.close());
+        exit.setOnAction(e -> {
+        	datapw.close();
+        	primaryStage.close();
+        });
         root.setBottom(exit);
         BorderPane.setAlignment(exit, Pos.BOTTOM_CENTER);
         
@@ -119,7 +129,8 @@ public class Main extends Application {
     	VBox vb = new VBox();
     	String guide = "\n                          UPLOAD FILE"
     			+ "\nPlease enter the name of the file that you\nwant to upload in"
-    			+ " the text box below:";
+    			+ " the text box below:"
+    			+ "\nNote: the file MUST be in the current directory.";
     	Label lb = new Label(guide);
     	TextField tf = new TextField();
     	Button bt = new Button("Upload file");
@@ -138,16 +149,114 @@ public class Main extends Application {
      */
     private static void readFile(String fileName) {
     	try {
+    		BufferedReader br = new BufferedReader(new FileReader(fileName));
+    		String newLine = br.readLine();
+    		newLine = br.readLine();
+    		while (newLine != null) {
+    			datapw.println(newLine);
+    			newLine = br.readLine();
+    		}
     		fms.readCsvFile(fileName);
     		Alert alt = new Alert(AlertType.INFORMATION, "Upload Succeeded!");
     		alt.showAndWait().filter(r -> r==ButtonType.OK);
     	} catch (Exception e) {
     		Alert alt = new Alert(AlertType.WARNING, e.getMessage() 
-    				+ " File must in the MilkWeightAnalyzer directory.");
+    				+ "Invalid file name. File contain error or not in the MilkWeightAnalyzer directory.");
     		alt.showAndWait().filter(r -> r==ButtonType.OK);
     	}
     }
     
+    /**
+     * Generate the directions about saving data.
+     * 
+     * @return a VBox containing directions about saving data
+     */
+    private static VBox generateSaveDataModule() {
+    	VBox vb = new VBox();
+    	
+    	String guide = "\n                           SAVE DATA"
+    			+ "\nWhen you click the exit button below, the\n"
+    			+ "program will automatically save the current\n"
+    			+ "data in a file named \"data.csv\". Next time\n"
+    			+ "you can access the data by simply uploading\n"
+    			+ "the \"data.csv\" file.";
+    	Label lb = new Label(guide);
+    	vb.getChildren().add(lb);
+    	
+    	return vb;
+    }
+    
+    /**
+     * Generate the module that allows user to change the data of a 
+     * single farm at a single day.
+     * 
+     * @return a VBox representing that module
+     */
+    private static VBox generateChangeDataModule() {
+    	VBox vb = new VBox();
+    	
+    	// Set up the directions
+    	String guide = "\n                          CHANGE DATA"
+    			+ "\nPlease enter the information below to change\n"
+    			+ "the data of a given farm at a given date.\n"
+    			+ "If the farm or the date is new, that data will\n"
+    			+ "be added to the database.\n";
+    	Label lb = new Label(guide);
+    	vb.getChildren().add(lb);
+    	
+    	// Set up the input fields
+    	HBox date = new HBox();
+    	Label year = new Label("Year: ");
+    	Label month = new Label(" Month: ");
+    	Label day = new Label(" Day: ");
+    	TextField getYear = new TextField();
+    	getYear.setPrefWidth(70.0);
+    	TextField getMonth = new TextField();
+    	getMonth.setPrefWidth(40.0);
+    	TextField getDay = new TextField();
+    	getDay.setPrefWidth(40.0);
+    	date.getChildren().addAll(year, getYear, month, getMonth, day, getDay);
+    	vb.getChildren().add(date);
+    	
+    	HBox id = new HBox();
+    	Label ID = new Label("Farm ID: ");
+    	TextField getID = new TextField();
+    	getID.setPrefWidth(72.0);
+    	Label weight = new Label(" Milk Weight: ");
+    	TextField getWeight = new TextField();
+    	getWeight.setPrefWidth(60.0);
+    	id.getChildren().addAll(ID, getID, weight, getWeight);
+    	vb.getChildren().add(id);
+    	
+    	// Set up the button
+    	Button bt = new Button("Change data");
+    	bt.setOnAction(e -> {
+    		File f = new File("ChangeData.csv");
+    		try {
+				PrintWriter fpw = new PrintWriter(f);
+				fpw.println();
+				fpw.println(getYear.getText() + "-" + getMonth.getText() + "-" 
+						+ getDay.getText() + "," + getID.getText() + ","
+						+ getWeight.getText());
+				fpw.close();
+				fms.readCsvFile("ChangeData.csv");
+				Alert alt = new Alert(AlertType.INFORMATION, "Successfully changed or added data.");
+	    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+			} catch (Exception e1) {
+				Alert alt = new Alert(AlertType.WARNING, "Invalid input. Check the format or value"
+						+ " for each text field");
+	    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+			}
+    		getYear.clear();
+    		getMonth.clear();
+    		getDay.clear();
+    		getID.clear();
+    		getWeight.clear();
+    	});
+    	vb.getChildren().add(bt);
+    	
+    	return vb;
+    }
     
     /**
      * Generate the farm report module
@@ -174,15 +283,20 @@ public class Main extends Application {
     	hb.getChildren().addAll(id, getId, year, getYear);
     	
     	// Button for user to enter input
-    	Button bt = new Button("Get farm report");
+    	Button bt = new Button("Display farm report");
     	bt.setOnAction(e -> {
     		getFarmRep(getId.getText(), getYear.getText());
     		getId.clear();
     		getYear.clear();
     	});
+    	Button bt2 = new Button("Generate farm report file");
+    	bt2.setOnAction(e -> {
+    		getFarmRepFile(getId.getText(), getYear.getText());
+    		getId.clear();
+    		getYear.clear();
+    	});
     	
-    	
-    	vb.getChildren().addAll(lb, hb, bt);
+    	vb.getChildren().addAll(lb, hb, bt, bt2);
     	return vb;
     }
     
@@ -266,6 +380,56 @@ public class Main extends Application {
     }
     
     /**
+     * Generate a txt file of a farm report
+     * 
+     * @param id the id of the farm in the report
+     * @param year the year of the report
+     */
+    private static void getFarmRepFile(String id, String year) {
+    	// Declare needed local fields
+    	String ID = "";
+    	int Year = 0;
+    	FarmReport frp = null;
+    	
+    	// Read the user input
+    	try {
+    		ID = id;
+    		Year = Integer.parseInt(year);
+    	} catch (Exception e) {
+    		Alert alt = new Alert(AlertType.WARNING, "The format of ID or year is wrong.");
+    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		return;
+    	}
+    	
+    	// Get the farm report
+    	try {
+    		frp = fms.getFarmRep(ID, Year);
+    	} catch (IllegalArgumentException e) {
+    		Alert alt = new Alert(AlertType.WARNING, e.getMessage());
+    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		return;
+    	}
+    	
+    	// Generate file
+    	File file = new File(id + "  Year " + year + ".txt");
+    	
+    	try {
+    		PrintWriter pw = new PrintWriter(file);
+    		pw.println("Month,Weight,Percentage");
+    		for (int i=1; i<=12; i++) {
+    			pw.println(i + "," + frp.getWeight(i) + "," + DF.format(frp.getPercentage(i)));
+    		}
+    		pw.close();
+    	} catch (IOException e) {
+    		
+    	}
+    	
+    	Alert alt = new Alert(AlertType.INFORMATION, "File successfully generated.");
+		alt.showAndWait().filter(r -> r==ButtonType.OK);
+		return;
+    }
+    
+    /**
      * Generates the annual report module
      * 
      * @return a VBox representing the module that can generate annual report
@@ -289,13 +453,18 @@ public class Main extends Application {
     	hb.getChildren().addAll(year, getYear);
     	
     	// Button to enter inputs
-    	Button bt = new Button("Get annual report");
+    	Button bt = new Button("Display annual report");
     	bt.setOnAction(e -> {
     		getTimeRep("Annual", getYear.getText(), "1", "1", "12", "31");
     		getYear.clear();
     	});
+    	Button bt2 = new Button("Generate annual report file");
+    	bt2.setOnAction(e -> {
+    		getTimeRepFile("Annual", getYear.getText(), "1", "1", "12", "31");
+    		getYear.clear();
+    	});
     	
-    	vb.getChildren().addAll(lb, hb, bt);
+    	vb.getChildren().addAll(lb, hb, bt, bt2);
     	return vb;
     }
     
@@ -325,7 +494,7 @@ public class Main extends Application {
     	hb.getChildren().addAll(year, getYear, month, getMonth);
     	
     	// Button to enter inputs
-    	Button bt = new Button("Get monthly report");
+    	Button bt = new Button("Display monthly report");
     	bt.setOnAction(e -> {
     		String yeaR = getYear.getText();
     		String montH = getMonth.getText();
@@ -343,9 +512,26 @@ public class Main extends Application {
     		getYear.clear();
     		getMonth.clear();
     	});
+    	Button bt2 = new Button("Generate monthly report file");
+    	bt2.setOnAction(e -> {String yeaR = getYear.getText();
+    		String montH = getMonth.getText();
+    		try {
+    			getTimeRepFile("Monthly", yeaR, montH, "1", montH, 
+    					Integer.toString(daysInMonth(Integer.parseInt(yeaR), 
+    							Integer.parseInt(montH))));
+    		} catch (IllegalStateException ex) {
+    			Alert alt = new Alert(AlertType.WARNING, "Invalid month.");
+        		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		} catch (Exception ex) {
+    			Alert alt = new Alert(AlertType.WARNING, "The format of date is wrong.");
+        		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		}
+    		getYear.clear();
+    		getMonth.clear();
+    	});
     	
     	
-    	vb.getChildren().addAll(lb, hb, bt);
+    	vb.getChildren().addAll(lb, hb, bt, bt2);
     	return vb;
     }
     
@@ -441,7 +627,7 @@ public class Main extends Application {
     	hbend.getChildren().addAll(endM, getEndM, endD, getEndD);
     	
     	// Button to enter inputs
-    	Button bt = new Button("Get date range report");
+    	Button bt = new Button("Display date range report");
     	bt.setOnAction(e -> {
     		getTimeRep("Date Range", getYear.getText(), getStartM.getText(), 
     				getStartD.getText(), getEndM.getText(), getEndD.getText());
@@ -451,9 +637,19 @@ public class Main extends Application {
     		getEndM.clear();
     		getEndD.clear();
     	});
+    	Button bt2 = new Button("Generate date range report file");
+    	bt2.setOnAction(e -> {
+    		getTimeRepFile("Date Range", getYear.getText(), getStartM.getText(), 
+					getStartD.getText(), getEndM.getText(), getEndD.getText());
+    		getYear.clear();
+    		getStartM.clear();
+    		getStartD.clear();
+    		getEndM.clear();
+    		getEndD.clear();
+    	});
     	
     	vb2.getChildren().addAll(hbyear, hbstart, hbend);
-    	vb.getChildren().addAll(lb, vb2, bt);
+    	vb.getChildren().addAll(lb, vb2, bt, bt2);
     	return vb;
     }
     
@@ -687,6 +883,74 @@ public class Main extends Application {
     	timeRep.setScene(s);
     	timeRep.setTitle(type + " Report");
     	timeRep.show();
+    }
+    
+    /**
+     * Generate a time range report txt file.
+     * 
+     * @param type the type of this report, can be annual, monthly, or date range
+     * @param year the year of the report
+     * @param startM the start month of the report
+     * @param startD the start day of the report
+     * @param endM the end month of the report
+     * @param endD the end day of the report
+     */
+    private static void getTimeRepFile(String type, String year, String startM, String startD, String endM, String endD) {
+    	// Declare needed local fields
+    	int Year = 0;
+    	int StartM = 0;
+    	int StartD = 0;
+    	int EndM = 0;
+    	int EndD = 0;
+    	int Width = 0;
+    	TimeReport trp = null;
+    	
+    	// Read user inputs
+    	try {
+    		Year = Integer.parseInt(year);
+    		StartM = Integer.parseInt(startM);
+    		StartD = Integer.parseInt(startD);
+    		EndM = Integer.parseInt(endM);
+    		EndD = Integer.parseInt(endD);
+    	} catch (Exception e) {
+    		Alert alt = new Alert(AlertType.WARNING, "The format of date is wrong.");
+    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		return;
+    	}
+    	
+    	// Get the time report
+    	try {
+    		trp = fms.getDateRangeRep(Year, StartM, StartD, EndM, EndD);
+    	} catch (IllegalArgumentException e) {
+    		Alert alt = new Alert(AlertType.WARNING, e.getMessage());
+    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		return;
+    	}
+    	
+    	// Generate file
+    	File file = new File(type + " Report  " + startM + "."
+    			+ startD + "." + year + " to " + endM + "."
+    			+ endD + "." + year + ".txt");
+    	
+    	PrintWriter pw = null;
+    	
+    	try {
+    		pw = new PrintWriter(file);
+    		pw.println("If the report shows 0's and NaN's for some\nfarms, "
+    			+ "then the database does not contain\nrecord for "
+    			+ "that farm in this year.");
+    		pw.println("Farm ID,Weight,Percentage");
+    		for (int i=0; i<trp.getId().length; i++) {
+    			pw.println(trp.getId()[i]+","+trp.getWeight()[i]+","+DF.format(trp.getPercentage()[i]));
+    		}
+    		pw.close();
+    	} catch (IOException e) {
+    		e.printStackTrace();
+    	}
+    	
+    	Alert alt = new Alert(AlertType.INFORMATION, "File successfully generated.");
+		alt.showAndWait().filter(r -> r==ButtonType.OK);
+		return;
     }
 
     /**

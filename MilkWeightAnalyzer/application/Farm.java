@@ -1,3 +1,5 @@
+package application;
+
 /**
  * A Farm object represents a single farm. It stores the ID of a farm and a red 
  * black tree that contains all the data. The red black tree stores several Year 

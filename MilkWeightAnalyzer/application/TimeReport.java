@@ -1,3 +1,5 @@
+package application;
+
 /**
  * A TimeReport represents a single piece of report that contains all the farms for 
  * a certain range of time. It stores several arrays for farm id, weight, and 

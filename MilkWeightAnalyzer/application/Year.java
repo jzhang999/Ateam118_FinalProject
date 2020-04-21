@@ -1,3 +1,5 @@
+package application;
+
 /**
  * A Year object represents the data of a farm in a certain year. It stores the year 
  * number and an 2D array that stores the data of every day for a farm in this year.

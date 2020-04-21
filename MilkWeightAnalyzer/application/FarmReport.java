@@ -1,3 +1,5 @@
+package application;
+
 /**
  * A FarmReport represents a single piece of farm report. It stores an array of 
  * int (int[]) and an array of double (double[]). The int array stores the total 

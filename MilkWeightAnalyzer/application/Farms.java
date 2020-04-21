@@ -68,6 +68,34 @@ public class Farms {
 		}
 	}
 	
+	public void changeData(String Year, String Month, String Day, String id, String Weight) {
+		try {
+			int year = Integer.parseInt(Year);
+			int month = Integer.parseInt(Month);
+			int day = Integer.parseInt(Day);
+			int weight = Integer.parseInt(Weight);
+			if (farms.contains(id)) {					
+				if (farms.get(id).getYearData().contains(year)) {
+					int weightTemp = farms.get(id).getData(year).data[month][day];
+					farms.get(id).getData(year).data[month][day] = weight;
+					farms.get(id).getData(year).data[month][0] += weight;
+					farms.get(id).getData(year).data[month][0] -= weightTemp;
+				} else {
+					farms.get(id).insertNewYear(year);
+					farms.get(id).getData(year).data[month][day] = weight;
+					farms.get(id).getData(year).data[month][0] += weight;
+				}
+			} else {
+				farms.insert(id, new Farm(id));
+				farms.get(id).insertNewYear(year);						
+				farms.get(id).getData(year).data[month][day] = weight;
+				farms.get(id).getData(year).data[month][0] += weight;
+			}
+		} catch (Exception e) {
+			throw new IllegalArgumentException("Invalid input. Check the value and format of the inputs.");
+		}
+	}
+	
 	/**
 	 * Helper method that test if the file contains errors
 	 * 

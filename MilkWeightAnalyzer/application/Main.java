@@ -1,6 +1,8 @@
 package application;
 
 import java.text.DecimalFormat;
+import java.util.Scanner;
+
 import javafx.application.Application;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -27,11 +29,13 @@ import java.io.*;
 public class Main extends Application {
 
 	private static final int WINDOW_WIDTH = 740; // width of main page
-    private static final int WINDOW_HEIGHT = 700; // height of main page
+    private static final int WINDOW_HEIGHT = 790; // height of main page
     private static final String APP_TITLE = "Welcome to Milk Weight Analyzer!"; // title of app
     private static final DecimalFormat DF = new DecimalFormat("0.00000");// formatter for the percentage
     private static Farms fms;// The back-end that stores all the information
     private static File data;// File to save the data 
+    private static File dataTemp;
+    private static Scanner dataScn;
     private static PrintWriter datapw;// PrintWriter to write data to the file that stores the data
     
     /**
@@ -45,8 +49,27 @@ public class Main extends Application {
     	// Initialize fields
     	fms = new Farms();
     	data = new File("data.csv");
-    	datapw = new PrintWriter(data);
-    	datapw.println("date,farm_id,weight");
+    	if (data.exists()) {
+    		dataScn = new Scanner(data);
+    		dataTemp = new File("dataTemp.csv");
+    		PrintWriter dtpw = null;
+    		try {
+    			dtpw = new PrintWriter("dataTemp.csv");
+    		} catch (Exception e) {
+    			
+    		}
+    		while (dataScn.hasNextLine()) {
+    			dtpw.println(dataScn.nextLine());
+    		}
+    		dtpw.close();
+    		datapw = new PrintWriter(new FileWriter(data, false));
+    		datapw.println("date,farm_id,weight");
+    	} else {
+    		datapw = new PrintWriter(new FileWriter(data, false));
+    		datapw.println("date,farm_id,weight");
+    	}
+    	
+    	
 
     	BorderPane root = new BorderPane(); // Main layout of Border Pane
         
@@ -149,6 +172,30 @@ public class Main extends Application {
      */
     private static void readFile(String fileName) {
     	try {
+    		if (!fileName.equals("data.csv")) {
+    			fms.readCsvFile(fileName);
+    			BufferedReader br = new BufferedReader(new FileReader(fileName));
+    			String newLine = br.readLine();
+    			newLine = br.readLine();
+    			while (newLine != null) {
+    				datapw.println(newLine);
+    				newLine = br.readLine();
+    			}
+    		} else {
+    			readFileNoAlert("dataTemp.csv");
+    		}
+    		Alert alt = new Alert(AlertType.INFORMATION, "Upload Succeeded!");
+    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    	} catch (Exception e) {
+    		Alert alt = new Alert(AlertType.WARNING, e.getMessage() 
+    				+ " File contain error or not in the MilkWeightAnalyzer directory.");
+    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    	}
+    }
+    
+    private static void readFileNoAlert(String fileName) {
+    	try {
+    		fms.readCsvFile(fileName);
     		BufferedReader br = new BufferedReader(new FileReader(fileName));
     		String newLine = br.readLine();
     		newLine = br.readLine();
@@ -156,12 +203,9 @@ public class Main extends Application {
     			datapw.println(newLine);
     			newLine = br.readLine();
     		}
-    		fms.readCsvFile(fileName);
-    		Alert alt = new Alert(AlertType.INFORMATION, "Upload Succeeded!");
-    		alt.showAndWait().filter(r -> r==ButtonType.OK);
     	} catch (Exception e) {
     		Alert alt = new Alert(AlertType.WARNING, e.getMessage() 
-    				+ "Invalid file name. File contain error or not in the MilkWeightAnalyzer directory.");
+    				+ " File contain error or not in the MilkWeightAnalyzer directory.");
     		alt.showAndWait().filter(r -> r==ButtonType.OK);
     	}
     }
@@ -179,7 +223,9 @@ public class Main extends Application {
     			+ "program will automatically save the current\n"
     			+ "data in a file named \"data.csv\". Next time\n"
     			+ "you can access the data by simply uploading\n"
-    			+ "the \"data.csv\" file.";
+    			+ "the \"data.csv\" file.\n"
+    			+ "If you do not up load \"data.csv\" next time,\n"
+    			+ "those data will be lost.";
     	Label lb = new Label(guide);
     	vb.getChildren().add(lb);
     	
@@ -200,7 +246,9 @@ public class Main extends Application {
     			+ "\nPlease enter the information below to change\n"
     			+ "the data of a given farm at a given date.\n"
     			+ "If the farm or the date is new, that data will\n"
-    			+ "be added to the database.\n";
+    			+ "be added to the database.\n"
+    			+ "If both the farm and the date exist, the data on\n"
+    			+ "that day will be changed according to inputs.";
     	Label lb = new Label(guide);
     	vb.getChildren().add(lb);
     	
@@ -231,15 +279,11 @@ public class Main extends Application {
     	// Set up the button
     	Button bt = new Button("Change data");
     	bt.setOnAction(e -> {
-    		File f = new File("ChangeData.csv");
     		try {
-				PrintWriter fpw = new PrintWriter(f);
-				fpw.println();
-				fpw.println(getYear.getText() + "-" + getMonth.getText() + "-" 
-						+ getDay.getText() + "," + getID.getText() + ","
-						+ getWeight.getText());
-				fpw.close();
-				fms.readCsvFile("ChangeData.csv");
+				fms.changeData(getYear.getText(), getMonth.getText(),
+						getDay.getText(), getID.getText(), getWeight.getText());
+				datapw.println(getYear.getText() + "-" + getMonth.getText() + "-" +
+						getDay.getText() + "," + getID.getText() + "," + getWeight.getText());
 				Alert alt = new Alert(AlertType.INFORMATION, "Successfully changed or added data.");
 	    		alt.showAndWait().filter(r -> r==ButtonType.OK);
 			} catch (Exception e1) {
@@ -373,7 +417,7 @@ public class Main extends Application {
     	rep.setBottom(close);
     	rep.setAlignment(farmid, Pos.TOP_CENTER);
     	rep.setAlignment(close, Pos.BOTTOM_CENTER);
-    	Scene s = new Scene(rep,200,240);
+    	Scene s = new Scene(rep,200,280);
     	farmRep.setTitle("Farm Report");
     	farmRep.setScene(s);
     	farmRep.show();
@@ -673,13 +717,13 @@ public class Main extends Application {
     	int Width = 0;
     	Label ID = new Label("Farm ID");
     	Label WEIGHT = new Label("Milk Weight");
-    	Label PERCENTAGE = new Label("Percentage");
+    	Label PERCENTAGE = new Label("Percentage      ");
     	Label ID2 = new Label("Farm ID");
     	Label WEIGHT2 = new Label("Milk Weight");
-    	Label PERCENTAGE2 = new Label("Percentage");
+    	Label PERCENTAGE2 = new Label("Percentage      ");
     	Label ID3 = new Label("Farm ID");
     	Label WEIGHT3 = new Label("Milk Weight");
-    	Label PERCENTAGE3 = new Label("Percentage");
+    	Label PERCENTAGE3 = new Label("Percentage      ");
     	Stage timeRep = new Stage();
     	BorderPane rep = new BorderPane();
     	TimeReport trp = null;
@@ -707,8 +751,8 @@ public class Main extends Application {
     	}
     	
     	// Display the time report
-    	// Case 1: less than or equal to 50 farms
-    	if (trp.getId().length<=50) {
+    	// Case 1: less than or equal to 45 farms
+    	if (trp.getId().length<=45) {
     		// Set width for the window
     		Width = 300;
     		
@@ -736,8 +780,8 @@ public class Main extends Application {
     		hb.getChildren().addAll(id, weight, percentage);
     		rep.setCenter(hb);
     	} 
-    	// Case 2: 51 to 100 farms
-    	else if (trp.getId().length<=100) {
+    	// Case 2: 45 to 90 farms
+    	else if (trp.getId().length<=90) {
     		// Set width for the window
     		Width = 500;
     		
@@ -750,7 +794,7 @@ public class Main extends Application {
         	VBox percentage = new VBox();
         	percentage.getChildren().add(PERCENTAGE);
         	
-    		for (int i=0; i<50; i++) {
+    		for (int i=0; i<40; i++) {
     			Label Id = new Label(trp.getId()[i]+"          ");
         		id.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
@@ -772,7 +816,7 @@ public class Main extends Application {
         	VBox percentage2 = new VBox();
         	percentage2.getChildren().add(PERCENTAGE2);
         	
-    		for (int i=50; i<trp.getId().length; i++) {
+    		for (int i=40; i<trp.getId().length; i++) {
     			Label Id = new Label(trp.getId()[i]+"          ");
         		id2.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
@@ -785,10 +829,10 @@ public class Main extends Application {
     		rep.setRight(hb2);
     		
     	} 
-    	// Case 3: more than 100 farms
+    	// Case 3: more than 90 farms
     	else {
     		// Set width for the window
-    		Width = 750;
+    		Width = 770;
     		
     		
     		// Set up the first column
@@ -801,7 +845,7 @@ public class Main extends Application {
         	VBox percentage = new VBox();
         	percentage.getChildren().add(PERCENTAGE);
         	
-    		for (int i=0; i<50; i++) {
+    		for (int i=0; i<45; i++) {
     			Label Id = new Label(trp.getId()[i]+"          ");
         		id.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
@@ -824,7 +868,7 @@ public class Main extends Application {
         	VBox percentage2 = new VBox();
         	percentage2.getChildren().add(PERCENTAGE2);
         	
-    		for (int i=50; i<100; i++) {
+    		for (int i=45; i<90; i++) {
     			Label Id = new Label(trp.getId()[i]+"          ");
         		id2.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
@@ -847,7 +891,7 @@ public class Main extends Application {
         	VBox percentage3 = new VBox();
         	percentage3.getChildren().add(PERCENTAGE3);
         	
-    		for (int i=100; i<trp.getId().length; i++) {
+    		for (int i=90; i<trp.getId().length; i++) {
     			Label Id = new Label(trp.getId()[i]+"          ");
         		id3.getChildren().add(Id);
         		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
@@ -879,7 +923,7 @@ public class Main extends Application {
     	rep.setAlignment(close, Pos.BOTTOM_CENTER);
     	
     	// Display the scene
-    	Scene s = new Scene(rep, Width, 890);
+    	Scene s = new Scene(rep, Width, 920);
     	timeRep.setScene(s);
     	timeRep.setTitle(type + " Report");
     	timeRep.show();

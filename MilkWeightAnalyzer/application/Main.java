@@ -899,7 +899,10 @@ public class Main extends Application {
     			+ "If the report shows nothing, then you"
     			+ " haven't\nuploaded any file yet."
     			+ "\nThe generated file can be found in the current"
-    			+ "\ndirectory.";
+    			+ "\ndirectory."
+    			+ "\nIf the report shows 0's and NaN's for some"
+    			+ "\nfarms, then the database does not contain"
+    			+ "\nrecord for those farms in this year.";
     	Label lb = new Label(guide);
     	
     	// Input fields
@@ -938,7 +941,7 @@ public class Main extends Application {
     	root.setCenter(hb);
     	
     	// Display the window
-    	Scene s = new Scene(root, 295, 305);
+    	Scene s = new Scene(root, 295, 365);
     	stage.setScene(s);
     	stage.setTitle("Annual Report");
     	stage.show();
@@ -970,7 +973,10 @@ public class Main extends Application {
     			+ "If the report shows nothing, then you "
     			+ "haven't\nuploaded any file yet."
     			+ "\nThe generated file can be found in the current"
-    			+ "\ndirectory.";
+    			+ "\ndirectory."
+    			+ "\nIf the report shows 0's and NaN's for some"
+    			+ "\nfarms, then the database does not contain"
+    			+ "\nrecord for those farms in this year.";
     	Label lb = new Label(guide);
     	
     	// Input fields
@@ -1038,7 +1044,7 @@ public class Main extends Application {
     	root.setCenter(hb);
     	
     	// Display the window
-    	Scene saveDataScene = new Scene(root, 295, 320);
+    	Scene saveDataScene = new Scene(root, 295, 355);
     	stage.setScene(saveDataScene);
     	stage.setTitle("Monthly Report");
     	stage.show();
@@ -1119,7 +1125,10 @@ public class Main extends Application {
     	String guide = "\nPlease enter the range of date in the text\nfield below "
     			+ "to view a date range report.\n"
     			+ "If the report shows nothing, then you "
-    			+ "haven't\nuploaded any file yet.";
+    			+ "haven't\nuploaded any file yet."
+    			+ "\nIf the report shows 0's and NaN's for some"
+    			+ "\nfarms, then the database does not contain"
+    			+ "\nrecord for those farms in this year.";
     	Label lb = new Label(guide);
     	
     	// Input Fields
@@ -1186,7 +1195,7 @@ public class Main extends Application {
     	root.setCenter(hb);
     	
     	// Display the window
-    	Scene saveDataScene = new Scene(root, 295, 335);
+    	Scene saveDataScene = new Scene(root, 287, 370);
     	stage.setScene(saveDataScene);
     	stage.setTitle("Date Range Report");
     	stage.show();
@@ -1328,7 +1337,6 @@ public class Main extends Application {
     	int StartD = 0;
     	int EndM = 0;
     	int EndD = 0;
-    	int Width = 0;
     	TimeReport trp = null;
     	
     	// Read user inputs

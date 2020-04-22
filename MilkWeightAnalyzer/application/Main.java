@@ -4,6 +4,10 @@ import java.text.DecimalFormat;
 import java.util.Scanner;
 
 import javafx.application.Application;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
@@ -11,12 +15,16 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import java.io.*;
 
@@ -28,14 +36,15 @@ import java.io.*;
  */
 public class Main extends Application {
 
-	private static final int WINDOW_WIDTH = 740; // width of main page
-    private static final int WINDOW_HEIGHT = 790; // height of main page
+	private static final int WINDOW_WIDTH = 810; // width of main page
+    private static final int WINDOW_HEIGHT = 625; // height of main page
     private static final String APP_TITLE = "Welcome to Milk Weight Analyzer!"; // title of app
     private static final DecimalFormat DF = new DecimalFormat("0.00000");// formatter for the percentage
     private static Farms fms;// The back-end that stores all the information
     private static File data;// File to save the data 
-    private static File dataTemp;
-    private static Scanner dataScn;
+    private static File dataTemp;// File to temporarily store data
+    private static File selectedFile;// File to record the selected file while uploading files
+    private static Scanner dataScn;// Scanner to temporarily store history data
     private static PrintWriter datapw;// PrintWriter to write data to the file that stores the data
     
     /**
@@ -68,14 +77,14 @@ public class Main extends Application {
     		datapw = new PrintWriter(new FileWriter(data, false));
     		datapw.println("date,farm_id,weight");
     	}
-    	
+    	selectedFile = null;
     	
 
     	BorderPane root = new BorderPane(); // Main layout of Border Pane
         
         // set top, label of the company view
         ImageView imageView1 = setImage("topOfMainPage.png");
-        imageView1.setFitWidth(400);
+        imageView1.setFitWidth(810);
         imageView1.setPreserveRatio(true);
         root.setTop(imageView1);
         BorderPane.setAlignment(imageView1, Pos.TOP_CENTER);
@@ -101,23 +110,76 @@ public class Main extends Application {
         VBox layoutCenter = new VBox();
         Label space = new Label("                 ");
         layoutCenter.getChildren().add(space);
-        VBox readFile = generateReadFileModule();
-        VBox saveData = generateSaveDataModule();
-        VBox changeData = generateChangeDataModule();
-        VBox farmRep = generateFarmRepModule();
-        VBox annualRep = generateAnnualRepModule();
-        VBox monthlyRep = generateMonthlyRepModule();
-        VBox dateRangeRep = generateDateRangeRepModule();
-        layoutLeft.getChildren().addAll(readFile, saveData, farmRep, monthlyRep);
-        layoutRight.getChildren().addAll(changeData, annualRep, dateRangeRep);
-        layout.getChildren().addAll(layoutLeft, layoutCenter, layoutRight);
+        
+        Label space2 = new Label("           ");
+        Label space3 = new Label("           ");
+        Label space4 = new Label("           ");
+        Label space5 = new Label("           ");
+        Label lb1 = new Label("Process Data");
+        setTopicStyle(lb1);
+        Label lb2 = new Label(" Get Reports");
+        setTopicStyle(lb2);
+        
+        Button readFile = new Button("Upload file");
+        setButtonStyle(readFile);
+        readFile.setOnAction(e -> {
+        	generateReadFileModule();
+        });
+        
+        Button saveData = new Button("Save data");
+        setButtonStyle(saveData);
+        saveData.setOnAction(e -> {
+        	generateSaveDataModule();
+        });
+        
+        Button changeData = new Button("Edit or add data");
+        setButtonStyle(changeData);
+        changeData.setOnAction(e -> {
+        	generateChangeDataModule();
+        });
+        
+        Button removeData = new Button("Remove data");
+        setButtonStyle(removeData);
+        removeData.setOnAction(e -> {
+        	generateRemoveDataModule();
+        });
+        
+        Button farmRep = new Button("Farm report");
+        setButtonStyle(farmRep);
+        farmRep.setOnAction(e -> {
+        	generateFarmRepModule();
+        });
+        
+        Button annualRep = new Button("Annual report");
+        setButtonStyle(annualRep);
+        annualRep.setOnAction(e -> {
+        	generateAnnualRepModule();
+        });
+        
+        Button monthlyRep = new Button("Monthly report");
+        setButtonStyle(monthlyRep);
+        monthlyRep.setOnAction(e -> {
+        	generateMonthlyRepModule();
+        });
+        
+        Button dateRangeRep = new Button("Date range report");
+        setButtonStyle(dateRangeRep);
+        dateRangeRep.setOnAction(e -> {
+        	generateDateRangeRepModule();
+        });
+        
+        layoutLeft.getChildren().addAll(space4, lb1, readFile, saveData, changeData, removeData);
+        layoutRight.getChildren().addAll(space5, lb2, farmRep, annualRep, monthlyRep, dateRangeRep);
+        layoutLeft.setSpacing(5.0);
+        layoutRight.setSpacing(5.0);
+        layout.getChildren().addAll(space2, layoutLeft, layoutCenter, layoutRight, space3);
         root.setCenter(layout);
         
         // Bottom exit button
         Button exit = new Button("Exit");
         exit.setOnAction(e -> {
         	datapw.close();
-        	primaryStage.close();
+        	System.exit(0);
         });
         root.setBottom(exit);
         BorderPane.setAlignment(exit, Pos.BOTTOM_CENTER);
@@ -127,6 +189,29 @@ public class Main extends Application {
         primaryStage.setTitle(APP_TITLE);
         primaryStage.setScene(mainScene);
         primaryStage.show();
+    }
+    
+    /**
+     * Helper method to format main menu buttons.
+     * 
+     * @param btn the button that need to be formatted
+     */
+    private static void setButtonStyle(Button btn) {
+    	btn.setPrefSize(265.0, 80.0);
+        btn.setStyle("-fx-font-family:'Georgia';"
+        		+ "-fx-font-size:25;"
+        		+ "-fx-font-weight: bold");
+    }
+    
+    /**
+     * Helper method to format topic
+     * 
+     * @param lb the label that need to be formated
+     */
+    private static void setTopicStyle(Label lb) {
+    	lb.setStyle("-fx-font-family:'Georgia';"
+        		+ "-fx-font-size:40;"
+        		+ "-fx-font-weight: bold");
     }
     
     /**
@@ -148,21 +233,99 @@ public class Main extends Application {
      * 
      * @return a VBox that represents the read file module
      */
-    private static VBox generateReadFileModule() {
+    private static void generateReadFileModule() {
+    	// Declare needed field.
+    	Stage readFileStage = new Stage();
     	VBox vb = new VBox();
-    	String guide = "\n                          UPLOAD FILE"
-    			+ "\nPlease enter the name of the file that you\nwant to upload in"
-    			+ " the text box below:"
-    			+ "\nNote: the file MUST be in the current directory.";
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	
+    	// Set page title
+    	String title = "\nUpload File\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
+    	
+    	// Add guides and text fields
+    	// Upload by typing file name
+    	String guide = "\nPlease enter the name of the file that you\nwant to upload in"
+    			+ " the text box below:";
     	Label lb = new Label(guide);
+    	String guide2 = "Note: The file MUST be in the current directory."
+    			+ "\n          DO NOT upload \"data.csv\" here.";
+    	Label lb2 = new Label(guide2);
     	TextField tf = new TextField();
     	Button bt = new Button("Upload file");
     	bt.setOnAction(e -> {
     		readFile(tf.getText());
     		tf.clear();
     	});
-    	vb.getChildren().addAll(lb, tf, bt);
-    	return vb;
+    	vb.getChildren().addAll(lb, tf, bt, lb2);
+    	
+    	// Upload by select file
+    	String guide3 = "\nIf you want to select a file from your computer, "
+    			+ "\nplease click the button below.";
+    	Label lb3 = new Label(guide3);
+    	String guide4 = "Note: The file MUST be a csv file."
+    			+ "\n          DO NOT upload \"data.csv\" here.";
+    	Label lb4 = new Label(guide4);
+    	vb.getChildren().add(lb3);
+    	
+    	FileChooser fileChooser = new FileChooser();
+    	Button chooseFile = new Button("Choose file from the computer");
+    	chooseFile.setOnAction(e -> {
+    		selectedFile = fileChooser.showOpenDialog(readFileStage);
+    		try {
+    			readFile(selectedFile.getAbsolutePath());
+    		} catch (Exception e1) {
+    			Alert alt = new Alert(AlertType.WARNING, "An error occured while choosing file.");
+        		alt.showAndWait().filter(r -> r==ButtonType.OK);
+    		}
+    	});
+    	vb.getChildren().add(chooseFile);
+    	vb.getChildren().add(lb4);
+    	
+    	// Upload history data
+    	String guide5 = "\nIf you want to upload \"data.csv\", the file that"
+    			+ "\ncontains the data you have uploaded last time,"
+    			+ "\nclick the button below.";
+    	Label lb5 = new Label(guide5);
+    	vb.getChildren().add(lb5);
+    	
+    	Button uploadDataCsv = new Button("Upload \"data.csv\"");
+    	uploadDataCsv.setOnAction(e -> {
+    		readFile("data.csv");
+    	});
+    	vb.getChildren().add(uploadDataCsv);
+    	
+    	String guide6 = "Note: The file \"data.csv\" must be in the current "
+    			+ "\ndirectory."
+    			+ "\n          If you do not upload \"data.csv\" this time, "
+    			+ "\nyou will lose all the data in it.";
+    	Label lb6 = new Label(guide6);
+    	vb.getChildren().add(lb6);
+    	
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	
+    	root.setCenter(hb);
+    	
+    	// Add exit button
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		readFileStage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Display window
+    	Scene readFileScene = new Scene(root, 295, 550);
+    	readFileStage.setScene(readFileScene);
+    	readFileStage.setTitle("Upload File");
+    	readFileStage.show();
     }
     
     /**
@@ -193,6 +356,11 @@ public class Main extends Application {
     	}
     }
     
+    /**
+     * Helper method to read "data.csv"
+     * 
+     * @param fileName the name of the file that needs to be read
+     */
     private static void readFileNoAlert(String fileName) {
     	try {
     		fms.readCsvFile(fileName);
@@ -212,38 +380,90 @@ public class Main extends Application {
     
     /**
      * Generate the directions about saving data.
-     * 
-     * @return a VBox containing directions about saving data
      */
-    private static VBox generateSaveDataModule() {
+    private static void generateSaveDataModule() {
+    	// Declare needed fields
     	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage saveDataStage = new Stage();
     	
-    	String guide = "\n                           SAVE DATA"
-    			+ "\nWhen you click the exit button below, the\n"
-    			+ "program will automatically save the current\n"
-    			+ "data in a file named \"data.csv\". Next time\n"
-    			+ "you can access the data by simply uploading\n"
-    			+ "the \"data.csv\" file.\n"
-    			+ "If you do not up load \"data.csv\" next time,\n"
-    			+ "those data will be lost.";
+    	// Set page title
+    	String title = "\nSave Data\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
+    	
+    	// Set up guide for user
+    	String guide = 
+    			  "\nWhen you click the exit button at the main"
+    			+ "\npage of this program. The program will"
+    			+ "\nautomatically save all the data you have"
+    			+ "\nuploaded this time in a csv file named"
+    			+ "\n\"data.csv\"."
+    			+ "\nYou can also save the data and exit by clicking"
+    			+ "\nthe button below."
+    			+ "\nDO NOT move or edit \"data.csv\" because"
+    			+ "\notherwise you will not be able to retrieve your"
+    			+ "\ndata next time."
+    			+ "\nYou can copy the \"data.csv\" to another"
+    			+ "\ndirectory to save or edit it.";
     	Label lb = new Label(guide);
     	vb.getChildren().add(lb);
     	
-    	return vb;
+    	// Exit button to close the application
+    	Button saveAndExit = new Button("Save data and exit the program");
+    	saveAndExit.setOnAction(e -> {
+    		datapw.close();
+    		System.exit(0);
+    	});
+    	vb.getChildren().add(saveAndExit);
+    	
+    	// Button to close the window
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		saveDataStage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Set space on both sides
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display the window
+    	Scene saveDataScene = new Scene(root, 295, 343);
+    	saveDataStage.setScene(saveDataScene);
+    	saveDataStage.setTitle("Save Data");
+    	saveDataStage.show();
     }
     
     /**
      * Generate the module that allows user to change the data of a 
      * single farm at a single day.
-     * 
-     * @return a VBox representing that module
      */
-    private static VBox generateChangeDataModule() {
+    private static void generateChangeDataModule() {
+    	// Declare needed fields
     	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage stage = new Stage();
+    	
+    	// Set page title
+    	String title = "\nEdit or Add Data\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
     	
     	// Set up the directions
-    	String guide = "\n                          CHANGE DATA"
-    			+ "\nPlease enter the information below to change\n"
+    	String guide = 
+    			"\nPlease enter the information below to change\n"
     			+ "the data of a given farm at a given date.\n"
     			+ "If the farm or the date is new, that data will\n"
     			+ "be added to the database.\n"
@@ -277,7 +497,7 @@ public class Main extends Application {
     	vb.getChildren().add(id);
     	
     	// Set up the button
-    	Button bt = new Button("Change data");
+    	Button bt = new Button("Edit or add data");
     	bt.setOnAction(e -> {
     		try {
 				fms.changeData(getYear.getText(), getMonth.getText(),
@@ -299,7 +519,125 @@ public class Main extends Application {
     	});
     	vb.getChildren().add(bt);
     	
-    	return vb;
+    	// Set up the button to close the window
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		stage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Set up spacing on both sides
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display the window
+    	Scene saveDataScene = new Scene(root, 295, 300);
+    	stage.setScene(saveDataScene);
+    	stage.setTitle("Edit or add Data");
+    	stage.show();
+    }
+    
+    /**
+     * Generate the module that allows user to remove the data of a 
+     * single farm at a single day.
+     */
+    private static void generateRemoveDataModule() {
+    	// Declare needed fields
+    	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage stage = new Stage();
+    	
+    	// Set page title
+    	String title = "\nRemove Data\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
+    	
+    	// Set up the directions
+    	String guide = 
+    			"\nPlease enter the information below to remove\n"
+    			+ "the data of a given farm at a given date.\n"
+    			+ "If the farm or the date is new, the system will\n"
+    			+ "save the data \n"
+    			+ "If both the farm and the date exist, the data on\n"
+    			+ "that day will be changed according to inputs.";
+    	Label lb = new Label(guide);
+    	vb.getChildren().add(lb);
+    	
+    	// Set up the input fields
+    	HBox date = new HBox();
+    	Label year = new Label("Year: ");
+    	Label month = new Label(" Month: ");
+    	Label day = new Label(" Day: ");
+    	TextField getYear = new TextField();
+    	getYear.setPrefWidth(70.0);
+    	TextField getMonth = new TextField();
+    	getMonth.setPrefWidth(40.0);
+    	TextField getDay = new TextField();
+    	getDay.setPrefWidth(40.0);
+    	date.getChildren().addAll(year, getYear, month, getMonth, day, getDay);
+    	vb.getChildren().add(date);
+    	
+    	HBox id = new HBox();
+    	Label ID = new Label("Farm ID: ");
+    	TextField getID = new TextField();
+    	getID.setPrefWidth(72.0);
+    	id.getChildren().addAll(ID, getID);
+    	vb.getChildren().add(id);
+    	
+    	// Set up the button
+    	Button bt = new Button("Remove data");
+    	bt.setOnAction(e -> {
+    		try {
+    			if (fms.contains(getID.getText()) && 
+    					fms.getFarm(getID.getText()).getYearData().contains(Integer.parseInt(getYear.getText()))) {
+    				fms.changeData(getYear.getText(), getMonth.getText(),
+    						getDay.getText(), getID.getText(), "0");
+    				datapw.println(getYear.getText() + "-" + getMonth.getText() + "-" +
+    						getDay.getText() + "," + getID.getText() + "," + "0");
+    				Alert alt = new Alert(AlertType.INFORMATION, "Successfully removed data.");
+    				alt.showAndWait().filter(r -> r==ButtonType.OK);
+    			} else {
+    				Alert alt = new Alert(AlertType.WARNING, "The data you want to remove does not exist.");
+    				alt.showAndWait().filter(r -> r==ButtonType.OK);
+    			}
+			} catch (Exception e1) {
+				Alert alt = new Alert(AlertType.WARNING, "Invalid input. Check the format or value"
+						+ " for each text field");
+	    		alt.showAndWait().filter(r -> r==ButtonType.OK);
+			}
+    		getYear.clear();
+    		getMonth.clear();
+    		getDay.clear();
+    		getID.clear();
+    	});
+    	vb.getChildren().add(bt);
+    	
+    	// Set up the button to close the window
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		stage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Set up spacing on both sides
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display the window
+    	Scene saveDataScene = new Scene(root, 295, 310);
+    	stage.setScene(saveDataScene);
+    	stage.setTitle("Remove Data");
+    	stage.show();
     }
     
     /**
@@ -307,24 +645,37 @@ public class Main extends Application {
      * 
      * @return a VBox representing the module that can generate farm reports.
      */
-    private static VBox generateFarmRepModule() {
+    private static void generateFarmRepModule() {
+    	// Declare needed fields
     	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage stage = new Stage();
+    	
+    	// Set page title
+    	String title = "\nFarm Report\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
     	
     	// Set the directions on the top
-    	String guide = "\n                     GET FARM REPORT"
-    			+ "\nPlease enter the farm ID and the year in\nthe text field below "
-    			+ "to view a farm report.";
+    	String guide = "\nPlease enter the farm ID and the year in\nthe text field below "
+    			+ "to view a farm report."
+    			+ "\nThe generated file can be found in the current"
+    			+ "\ndirectory.";
     	Label lb = new Label(guide);
     	
     	// Fields for user to type inputs
-    	HBox hb = new HBox();
+    	HBox hb1 = new HBox();
     	Label id = new Label("ID: ");
     	Label year = new Label("  Year: ");
     	TextField getId = new TextField();
     	getId.setPrefWidth(70.0);
     	TextField getYear = new TextField();
     	getYear.setPrefWidth(70.0);
-    	hb.getChildren().addAll(id, getId, year, getYear);
+    	hb1.getChildren().addAll(id, getId, year, getYear);
     	
     	// Button for user to enter input
     	Button bt = new Button("Display farm report");
@@ -340,9 +691,58 @@ public class Main extends Application {
     		getYear.clear();
     	});
     	
-    	vb.getChildren().addAll(lb, hb, bt, bt2);
-    	return vb;
+    	vb.getChildren().addAll(lb, hb1, bt, bt2);
+    	
+    	// Close window button
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		stage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Spacing on both sides
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display
+    	Scene saveDataScene = new Scene(root, 295, 275);
+    	stage.setScene(saveDataScene);
+    	stage.setTitle("Farm Report");
+    	stage.show();
     }
+    
+    /**
+     * Helper class for the TableView of farm report
+     * 
+     * @author Xinrui Liu
+     *
+     */
+    public static class SingleMonthData {
+		private SimpleIntegerProperty month;
+		private SimpleIntegerProperty weight;
+		private SimpleStringProperty percentage;
+		
+		private SingleMonthData(int month, int weight, String percentage) {
+			this.month = new SimpleIntegerProperty(month);
+			this.weight = new SimpleIntegerProperty(weight);
+			this.percentage = new SimpleStringProperty(percentage);
+		}
+		
+		public int getMonth() {
+			return month.get();
+		}
+		
+		public int getWeight() {
+			return weight.get();
+		}
+		
+		public String getPercentage() {
+			return percentage.get();
+		}
+	}
     
     /**
      * Show a farm report according to the input id and year
@@ -376,32 +776,34 @@ public class Main extends Application {
     		return;
     	}
     	
-    	// Display the farm report
-    	VBox month = new VBox();
-    	Label MONTH = new Label("Month");
-    	month.getChildren().add(MONTH);
-    	VBox weight = new VBox();
-    	Label WEIGHT = new Label("Milk Weight");
-    	weight.getChildren().add(WEIGHT);
-    	VBox percentage = new VBox();
-    	Label PERCENTAGE = new Label("Percentage");
-    	percentage.getChildren().add(PERCENTAGE);
-    	for (int i=1; i<=9; i++) {
-    		Label Month = new Label(Integer.toString(i)+"          ");
-    		month.getChildren().add(Month);
-    		Label Weight = new Label(Integer.toString(frp.getWeight(i))+"          ");
-    		weight.getChildren().add(Weight);
-    		Label Percentage = new Label(DF.format(frp.getPercentage(i)));
-    		percentage.getChildren().add(Percentage);
+    	
+    	
+    	// Set up the farm report
+    	VBox vb = new VBox();
+    	ObservableList<SingleMonthData> data = FXCollections.observableArrayList();
+    	for (int i=1; i<=12; i++) {
+    		SingleMonthData e = null;
+    		e = new SingleMonthData(i, frp.getWeight(i), DF.format(frp.getPercentage(i)*100)+"%");
+    		data.add(e);
     	}
-    	for (int i=10; i<=12; i++) {
-    		Label Month = new Label(Integer.toString(i)+"         ");
-    		month.getChildren().add(Month);
-    		Label Weight = new Label(Integer.toString(frp.getWeight(i))+"          ");
-    		weight.getChildren().add(Weight);
-    		Label Percentage = new Label(DF.format(frp.getPercentage(i)));
-    		percentage.getChildren().add(Percentage);
-    	}
+    	
+    	TableView tb = new TableView();
+    	TableColumn month = new TableColumn("Month");
+    	month.setPrefWidth(70.0);
+    	month.setCellValueFactory(new PropertyValueFactory<SingleMonthData, Integer>("month"));
+    	
+    	TableColumn weight = new TableColumn("Milk Weight");
+    	weight.setPrefWidth(120.0);
+    	weight.setCellValueFactory(new PropertyValueFactory<SingleMonthData, Integer>("weight"));
+    	
+    	TableColumn percentage = new TableColumn("Percentage");
+    	percentage.setPrefWidth(120.0);
+    	percentage.setCellValueFactory(new PropertyValueFactory<SingleMonthData, String>("percentage"));
+    	
+    	tb.setItems(data);
+    	tb.getColumns().addAll(month, weight, percentage);
+    	vb.getChildren().add(tb);
+    	
     	
     	// Button to close that report
     	Button close = new Button("Close report");
@@ -411,13 +813,11 @@ public class Main extends Application {
     	BorderPane rep = new BorderPane();
     	Label farmid = new Label(id + "  Year " + year);
     	rep.setTop(farmid);
-    	rep.setLeft(month);
-    	rep.setCenter(weight);
-    	rep.setRight(percentage);
+    	rep.setCenter(vb);
     	rep.setBottom(close);
     	rep.setAlignment(farmid, Pos.TOP_CENTER);
     	rep.setAlignment(close, Pos.BOTTOM_CENTER);
-    	Scene s = new Scene(rep,200,280);
+    	Scene s = new Scene(rep,312,356);
     	farmRep.setTitle("Farm Report");
     	farmRep.setScene(s);
     	farmRep.show();
@@ -478,23 +878,36 @@ public class Main extends Application {
      * 
      * @return a VBox representing the module that can generate annual report
      */
-    private static VBox generateAnnualRepModule() {
+    private static void generateAnnualRepModule() {
+    	// Declare needed fields
     	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage stage = new Stage();
+    	
+    	// Set page title
+    	String title = "\nAnnual Report\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
     	
     	// Directions for users
-    	String guide = "\n                   GET ANNUAL REPORT"
-    			+ "\nPlease enter the year in the text field below\n"
+    	String guide = "\nPlease enter the year in the text field below\n"
     			+ "to view an annual report.\n"
     			+ "If the report shows nothing, then you"
-    			+ " haven't\nuploaded any file yet.";
+    			+ " haven't\nuploaded any file yet."
+    			+ "\nThe generated file can be found in the current"
+    			+ "\ndirectory.";
     	Label lb = new Label(guide);
     	
     	// Input fields
-    	HBox hb = new HBox();
+    	HBox hb1 = new HBox();
     	Label year = new Label("Year: ");
     	TextField getYear = new TextField();
     	getYear.setPrefWidth(70.0);    	
-    	hb.getChildren().addAll(year, getYear);
+    	hb1.getChildren().addAll(year, getYear);
     	
     	// Button to enter inputs
     	Button bt = new Button("Display annual report");
@@ -508,8 +921,27 @@ public class Main extends Application {
     		getYear.clear();
     	});
     	
-    	vb.getChildren().addAll(lb, hb, bt, bt2);
-    	return vb;
+    	vb.getChildren().addAll(lb, hb1, bt, bt2);
+    	
+    	// Close window button
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		stage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Spacing on left and right
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display the window
+    	Scene s = new Scene(root, 295, 305);
+    	stage.setScene(s);
+    	stage.setTitle("Annual Report");
+    	stage.show();
     }
     
     /**
@@ -517,25 +949,39 @@ public class Main extends Application {
      * 
      * @return a VBox representing the module that can generate monthly report
      */
-    private static VBox generateMonthlyRepModule() {
+    private static void generateMonthlyRepModule() {
+    	// Declare needed fields
     	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage stage = new Stage();
+    	
+    	// Set page title
+    	String title = "\nMonthly Report\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
+    	
     	// Directions for users
-    	String guide = "\n                  GET MONTHLY REPORT"
-    			+ "\nPlease enter the year and the month in the\ntext field below "
+    	String guide = "\nPlease enter the year and the month in the\ntext field below "
     			+ "to view a monthly report.\n"
     			+ "If the report shows nothing, then you "
-    			+ "haven't\nuploaded any file yet.";
+    			+ "haven't\nuploaded any file yet."
+    			+ "\nThe generated file can be found in the current"
+    			+ "\ndirectory.";
     	Label lb = new Label(guide);
     	
     	// Input fields
-    	HBox hb = new HBox();
+    	HBox hb1 = new HBox();
     	Label year = new Label("Year: ");
     	TextField getYear = new TextField();
     	getYear.setPrefWidth(70.0);
     	Label month = new Label("  Month: ");
     	TextField getMonth = new TextField();
     	getMonth.setPrefWidth(70.0);
-    	hb.getChildren().addAll(year, getYear, month, getMonth);
+    	hb1.getChildren().addAll(year, getYear, month, getMonth);
     	
     	// Button to enter inputs
     	Button bt = new Button("Display monthly report");
@@ -575,8 +1021,27 @@ public class Main extends Application {
     	});
     	
     	
-    	vb.getChildren().addAll(lb, hb, bt, bt2);
-    	return vb;
+    	vb.getChildren().addAll(lb, hb1, bt, bt2);
+    	
+    	// Close window button
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		stage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Spacing on left and right
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display the window
+    	Scene saveDataScene = new Scene(root, 295, 320);
+    	stage.setScene(saveDataScene);
+    	stage.setTitle("Monthly Report");
+    	stage.show();
     }
     
     /**
@@ -635,12 +1100,23 @@ public class Main extends Application {
      * 
      * @return a VBox representing the module that can generate date range report
      */
-    private static VBox generateDateRangeRepModule() {
+    private static void generateDateRangeRepModule() {
+    	// Declare needed fields
     	VBox vb = new VBox();
+    	vb.setSpacing(5.0);
+    	HBox hb = new HBox();
+    	BorderPane root = new BorderPane();
+    	Stage stage = new Stage();
+    	
+    	// Set page title
+    	String title = "\nDate Range Report\n";
+    	Label titlelb = new Label(title);
+    	titlelb.setStyle("-fx-font-size: 15");
+    	root.setTop(titlelb);
+    	root.setAlignment(titlelb, Pos.TOP_CENTER);
     	
     	// User directions
-    	String guide = "\n                GET DATE RANGE REPORT"
-    			+ "\nPlease enter the range of date in the text\nfield below "
+    	String guide = "\nPlease enter the range of date in the text\nfield below "
     			+ "to view a date range report.\n"
     			+ "If the report shows nothing, then you "
     			+ "haven't\nuploaded any file yet.";
@@ -694,8 +1170,57 @@ public class Main extends Application {
     	
     	vb2.getChildren().addAll(hbyear, hbstart, hbend);
     	vb.getChildren().addAll(lb, vb2, bt, bt2);
-    	return vb;
+    	
+    	// Close window button
+    	Button exit = new Button("Back");
+    	exit.setOnAction(e -> {
+    		stage.close();
+    	});
+    	root.setBottom(exit);
+    	root.setAlignment(exit, Pos.BOTTOM_CENTER);
+    	
+    	// Spacing on left and right
+    	Label space1 = new Label("   ");
+    	Label space2 = new Label("   ");
+    	hb.getChildren().addAll(space1, vb, space2);
+    	root.setCenter(hb);
+    	
+    	// Display the window
+    	Scene saveDataScene = new Scene(root, 295, 335);
+    	stage.setScene(saveDataScene);
+    	stage.setTitle("Date Range Report");
+    	stage.show();
     }
+    
+    /**
+     * Helper class for TableView to generate reports based on time range.
+     * 
+     * @author Xinrui Liu
+     *
+     */
+    public static class SingleFarmData {
+		private SimpleStringProperty id;
+		private SimpleIntegerProperty weight;
+		private SimpleStringProperty percentage;
+		
+		private SingleFarmData(String id, int weight, String percentage) {
+			this.id = new SimpleStringProperty(id);
+			this.weight = new SimpleIntegerProperty(weight);
+			this.percentage = new SimpleStringProperty(percentage);
+		}
+		
+		public String getId() {
+			return id.get();
+		}
+		
+		public int getWeight() {
+			return weight.get();
+		}
+		
+		public String getPercentage() {
+			return percentage.get();
+		}
+	}
     
     /**
      * Show a time report according to the input data
@@ -714,16 +1239,6 @@ public class Main extends Application {
     	int StartD = 0;
     	int EndM = 0;
     	int EndD = 0;
-    	int Width = 0;
-    	Label ID = new Label("Farm ID");
-    	Label WEIGHT = new Label("Milk Weight");
-    	Label PERCENTAGE = new Label("Percentage      ");
-    	Label ID2 = new Label("Farm ID");
-    	Label WEIGHT2 = new Label("Milk Weight");
-    	Label PERCENTAGE2 = new Label("Percentage      ");
-    	Label ID3 = new Label("Farm ID");
-    	Label WEIGHT3 = new Label("Milk Weight");
-    	Label PERCENTAGE3 = new Label("Percentage      ");
     	Stage timeRep = new Stage();
     	BorderPane rep = new BorderPane();
     	TimeReport trp = null;
@@ -750,171 +1265,30 @@ public class Main extends Application {
     		return;
     	}
     	
-    	// Display the time report
-    	// Case 1: less than or equal to 45 farms
-    	if (trp.getId().length<=45) {
-    		// Set width for the window
-    		Width = 300;
-    		
-    		HBox hb = new HBox();
-    		
-    		// Set three column
-    		VBox id = new VBox();
-        	id.getChildren().add(ID);
-        	VBox weight = new VBox();
-        	weight.getChildren().add(WEIGHT);
-        	VBox percentage = new VBox();
-        	percentage.getChildren().add(PERCENTAGE);
-        	
-        	// Add data to each column
-    		for (int i=0; i<trp.getId().length; i++) {
-    			Label Id = new Label(trp.getId()[i]+"          ");
-        		id.getChildren().add(Id);
-        		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
-        		weight.getChildren().add(Weight);
-        		Label Percentage = new Label(DF.format(trp.getPercentage()[i]));
-        		percentage.getChildren().add(Percentage);
-    		}
-    		
-    		// Set up the pane
-    		hb.getChildren().addAll(id, weight, percentage);
-    		rep.setCenter(hb);
-    	} 
-    	// Case 2: 45 to 90 farms
-    	else if (trp.getId().length<=90) {
-    		// Set width for the window
-    		Width = 500;
-    		
-    		// Set up the first column
-    		HBox hb = new HBox();
-    		VBox id = new VBox();
-        	id.getChildren().add(ID);
-        	VBox weight = new VBox();
-        	weight.getChildren().add(WEIGHT);
-        	VBox percentage = new VBox();
-        	percentage.getChildren().add(PERCENTAGE);
-        	
-    		for (int i=0; i<40; i++) {
-    			Label Id = new Label(trp.getId()[i]+"          ");
-        		id.getChildren().add(Id);
-        		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
-        		weight.getChildren().add(Weight);
-        		Label Percentage = new Label(DF.format(trp.getPercentage()[i]));
-        		percentage.getChildren().add(Percentage);
-    		}
-    		
-    		hb.getChildren().addAll(id, weight, percentage);
-    		rep.setLeft(hb);
-    		
-    		
-    		// Set up the second column
-    		HBox hb2 = new HBox();
-    		VBox id2 = new VBox();
-        	id2.getChildren().add(ID2);
-        	VBox weight2 = new VBox();
-        	weight2.getChildren().add(WEIGHT2);
-        	VBox percentage2 = new VBox();
-        	percentage2.getChildren().add(PERCENTAGE2);
-        	
-    		for (int i=40; i<trp.getId().length; i++) {
-    			Label Id = new Label(trp.getId()[i]+"          ");
-        		id2.getChildren().add(Id);
-        		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
-        		weight2.getChildren().add(Weight);
-        		Label Percentage = new Label(DF.format(trp.getPercentage()[i]));
-        		percentage2.getChildren().add(Percentage);
-    		}
-    		
-    		hb2.getChildren().addAll(id2, weight2, percentage2);
-    		rep.setRight(hb2);
-    		
-    	} 
-    	// Case 3: more than 90 farms
-    	else {
-    		// Set width for the window
-    		Width = 770;
-    		
-    		
-    		// Set up the first column
-    		HBox hb = new HBox();
-    		
-    		VBox id = new VBox();
-        	id.getChildren().add(ID);
-        	VBox weight = new VBox();
-        	weight.getChildren().add(WEIGHT);
-        	VBox percentage = new VBox();
-        	percentage.getChildren().add(PERCENTAGE);
-        	
-    		for (int i=0; i<45; i++) {
-    			Label Id = new Label(trp.getId()[i]+"          ");
-        		id.getChildren().add(Id);
-        		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
-        		weight.getChildren().add(Weight);
-        		Label Percentage = new Label(DF.format(trp.getPercentage()[i]));
-        		percentage.getChildren().add(Percentage);
-    		}
-    		
-    		hb.getChildren().addAll(id, weight, percentage);
-    		rep.setLeft(hb);
-    		
-    		
-    		// Set up the second column
-    		HBox hb2 = new HBox();
-    		
-    		VBox id2 = new VBox();
-        	id2.getChildren().add(ID2);
-        	VBox weight2 = new VBox();
-        	weight2.getChildren().add(WEIGHT2);
-        	VBox percentage2 = new VBox();
-        	percentage2.getChildren().add(PERCENTAGE2);
-        	
-    		for (int i=45; i<90; i++) {
-    			Label Id = new Label(trp.getId()[i]+"          ");
-        		id2.getChildren().add(Id);
-        		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
-        		weight2.getChildren().add(Weight);
-        		Label Percentage = new Label(DF.format(trp.getPercentage()[i]));
-        		percentage2.getChildren().add(Percentage);
-    		}
-    		
-    		hb2.getChildren().addAll(id2, weight2, percentage2);
-    		rep.setCenter(hb2);
-    		
-    		
-    		//Set up the third column
-    		HBox hb3 = new HBox();
-    		
-    		VBox id3 = new VBox();
-        	id3.getChildren().add(ID3);
-        	VBox weight3 = new VBox();
-        	weight3.getChildren().add(WEIGHT3);
-        	VBox percentage3 = new VBox();
-        	percentage3.getChildren().add(PERCENTAGE3);
-        	
-    		for (int i=90; i<trp.getId().length; i++) {
-    			Label Id = new Label(trp.getId()[i]+"          ");
-        		id3.getChildren().add(Id);
-        		Label Weight = new Label(Integer.toString(trp.getWeight()[i])+"          ");
-        		weight3.getChildren().add(Weight);
-        		Label Percentage = new Label(DF.format(trp.getPercentage()[i]));
-        		percentage3.getChildren().add(Percentage);
-    		}
-    		
-    		hb3.getChildren().addAll(id3, weight3, percentage3);
-    		rep.setRight(hb3);
+    	// Set up the farm report
+    	VBox vb = new VBox();
+    	ObservableList<SingleFarmData> data = FXCollections.observableArrayList();
+    	for (int i=0; i<trp.getId().length; i++) {
+    		SingleFarmData e = new SingleFarmData(trp.getId()[i], trp.getWeight()[i], DF.format(trp.getPercentage()[i]*100)+"%");
+    		data.add(e);
     	}
     	
-    	// Set the information on the top
-    	VBox vb2 = new VBox();
-    	Label lb2 = new Label(type + " Report   " + startM + "/"
-    			+ startD + "/" + year + " to " + endM + "/"
-    			+ endD + "/" + year
-    			+ "\n------------------------------------------------"
-    			+ "\nIf the report shows 0's and NaN's for some\nfarms, "
-    			+ "then the database does not contain\nrecord for "
-    			+ "that farm in this year.\n------------------------------------------------");
-    	rep.setTop(lb2);
-    	rep.setAlignment(lb2, Pos.TOP_CENTER);
+    	TableView tb = new TableView();
+    	TableColumn farmID = new TableColumn("Farm ID");
+    	farmID.setPrefWidth(90.0);
+    	farmID.setCellValueFactory(new PropertyValueFactory<SingleFarmData, String>("id"));
+    	
+    	TableColumn weight = new TableColumn("Milk Weight");
+    	weight.setPrefWidth(120.0);
+    	weight.setCellValueFactory(new PropertyValueFactory<SingleFarmData, Integer>("weight"));
+    	
+    	TableColumn percentage = new TableColumn("Percentage");
+    	percentage.setPrefWidth(120.0);
+    	percentage.setCellValueFactory(new PropertyValueFactory<SingleFarmData, String>("percentage"));
+    	
+    	tb.setItems(data);
+    	tb.getColumns().addAll(farmID, weight, percentage);
+    	vb.getChildren().add(tb);
     	
     	// Button to close the report
     	Button close = new Button("Close report");
@@ -922,10 +1296,18 @@ public class Main extends Application {
     	rep.setBottom(close);
     	rep.setAlignment(close, Pos.BOTTOM_CENTER);
     	
-    	// Display the scene
-    	Scene s = new Scene(rep, Width, 920);
-    	timeRep.setScene(s);
+    	// Set the scene and show the report
+    	Label lbb = new Label(type + " Report  "+ year + "/"
+    			+ startM + "/" + startD + " to " + year + "/"
+    			+ endM +"/" + endD);
+    	rep.setTop(lbb);
+    	rep.setCenter(vb);
+    	rep.setBottom(close);
+    	rep.setAlignment(lbb, Pos.TOP_CENTER);
+    	rep.setAlignment(close, Pos.BOTTOM_CENTER);
+    	Scene s = new Scene(rep,345,356);
     	timeRep.setTitle(type + " Report");
+    	timeRep.setScene(s);
     	timeRep.show();
     }
     

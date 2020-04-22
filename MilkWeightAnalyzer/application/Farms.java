@@ -68,6 +68,25 @@ public class Farms {
 		}
 	}
 	
+	/**
+	 * Decide whether a farm is present or not.
+	 * 
+	 * @param f the name of the farm
+	 * @return true if the farm is present, false otherwise
+	 */
+	public boolean contains(String f) {
+		return farms.contains(f);
+	}
+	
+	/**
+	 * Accessor for a single farm
+	 * @param f the name of the farm
+	 * @return a farm according to the input
+	 */
+	public Farm getFarm(String f) {
+		return farms.get(f);
+	}
+	
 	public void changeData(String Year, String Month, String Day, String id, String Weight) {
 		try {
 			int year = Integer.parseInt(Year);

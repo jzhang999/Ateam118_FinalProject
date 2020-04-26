@@ -274,13 +274,13 @@ public class Main extends Application {
     	vb.getChildren().add(lb3);
     	
     	FileChooser fileChooser = new FileChooser();
-    	Button chooseFile = new Button("Choose file from the computer");
+    	Button chooseFile = new Button("Choose a file from the computer");
     	chooseFile.setOnAction(e -> {
     		selectedFile = fileChooser.showOpenDialog(readFileStage);
     		try {
     			readFile(selectedFile.getAbsolutePath());
     		} catch (Exception e1) {
-    			Alert alt = new Alert(AlertType.WARNING, "An error occured while choosing file.");
+    			Alert alt = new Alert(AlertType.WARNING, "An error occured while choosing a file.");
         		alt.showAndWait().filter(r -> r==ButtonType.OK);
     		}
     	});

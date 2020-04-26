@@ -168,8 +168,10 @@ public class Farms {
 		double[] percentage = new double[13];
 		percentage[0] = 1.0;
 		for (int i=1; i<=12; i++) {
-			weight[i] = allYearData.data[i][0];
-			weight[0] += allYearData.data[i][0];
+			for (int j=1; j<=daysInMonth(year, i); j++) {
+				weight[i] += allYearData.data[i][j];
+			}
+			weight[0] += weight[i];
 		}
 		for (int i=1; i<=12; i++) {
 			percentage[i] = ((double) weight[i]) / ((double) weight[0]);

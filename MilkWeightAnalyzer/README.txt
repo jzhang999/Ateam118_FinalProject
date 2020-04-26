@@ -19,4 +19,4 @@ The test files are the edited csv files in the "large" folder of provided csv fi
 The test files are named 2019-X.csv (X is an integer between 1 and 12).
 
 data.csv and dataTemp.csv are required to run the program properly.
-DO NOT edit these two files
+DO NOT edit these two files.

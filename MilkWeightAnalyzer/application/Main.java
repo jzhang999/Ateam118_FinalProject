@@ -31,7 +31,7 @@ import java.io.*;
 /**
  * GUI for the Milk Weight Analyzer
  * 
- * @author Xinrui Liu
+ * @author Wenfei Huang, Hanjiang Wu, Jing Zhang, Yucheng Lin, Xinrui Liu
  *
  */
 public class Main extends Application {

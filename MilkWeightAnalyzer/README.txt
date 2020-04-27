@@ -20,3 +20,5 @@ The test files are named 2019-X.csv (X is an integer between 1 and 12).
 
 data.csv and dataTemp.csv are required to run the program properly.
 DO NOT edit these two files.
+
+topOfMainPage.png, cheese1.png, cheese2.png are required image files.

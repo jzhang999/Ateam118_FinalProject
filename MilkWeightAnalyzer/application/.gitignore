@@ -8,3 +8,16 @@
 /RBT.class
 /TimeReport.class
 /Year.class
+/ReadFile.class
+/GUIReadFile.class
+/GUISaveData.class
+/GUIChangeData.class
+/GUIRemoveData.class
+/GUIFarmReportModule.class
+/GUIFarmReportModule$SingleMonthData.class
+/GUIFarmReport$SingleMonthData.class
+/GUIFarmReport.class
+/GUIAnnualReport.class
+/GUIMonthlyReport.class
+/GUIDateRange.class
+/GUIDateRangeReport.class

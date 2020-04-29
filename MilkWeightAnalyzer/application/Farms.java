@@ -111,7 +111,8 @@ public class Farms {
 				farms.get(id).getData(year).data[month][0] += weight;
 			}
 		} catch (Exception e) {
-			throw new IllegalArgumentException("Invalid input. Check the value and format of the inputs.");
+			throw new IllegalArgumentException("Invalid input. Check the value and format of the inputs."
+					+ " Input value might be too large.");
 		}
 	}
 	
